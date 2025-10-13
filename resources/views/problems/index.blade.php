@@ -61,7 +61,7 @@
                             </td>
                             <td>{{ $question->created_at->format('Y年m月d日') }}</td>
                             <td>
-                                <button type="button" class="btn btn-outline-success btn-sm" onclick="editQuestion({{ $question->id }})">
+                                <button type="button" class="btn btn-outline-success btn-sm" onclick="loadQuestionEdit({{ $question->id }})">
                                     <i class="bi bi-pencil"></i> 編集
                                 </button>
                             </td>

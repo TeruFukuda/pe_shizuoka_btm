@@ -53,6 +53,12 @@ Route::middleware('auth')->group(function () {
         return view('problems.select');
     })->name('problems.select');
     
+    // 問題編集
+    Route::get('/problems/{question}/edit', function (\App\Models\QuizQuestion $question) {
+        $genres = \App\Models\Genre::ordered()->get();
+        return view('problems.edit', compact('question', 'genres'));
+    })->name('problems.edit');
+    
     // ジャンル管理
     Route::get('/genres', function () {
         try {

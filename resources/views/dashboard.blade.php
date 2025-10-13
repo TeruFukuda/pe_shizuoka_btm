@@ -1092,6 +1092,73 @@
             });
             window.paginationEventAdded = true;
         }
+
+        // 問題編集画面を読み込む関数
+        function loadQuestionEdit(questionId) {
+            console.log('問題編集画面の読み込み開始 (問題ID:', questionId, ')');
+            const mainContent = document.getElementById('mainContent');
+            
+            mainContent.innerHTML = `
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">読み込み中...</span>
+                    </div>
+                    <p class="mt-3">問題編集画面を読み込み中...</p>
+                </div>
+            `;
+            
+            fetch(`/problems/${questionId}/edit`)
+                .then(response => {
+                    console.log('編集画面レスポンス受信:', response.status, response.statusText);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    console.log('編集画面HTMLレスポンス受信:', html.length, '文字');
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const editContent = doc.querySelector('.problems-edit-container');
+                    
+                    if (editContent) {
+                        console.log('問題編集画面を表示');
+                        mainContent.innerHTML = editContent.outerHTML;
+                        
+                        // 編集画面のJavaScriptを実行
+                        const scriptTags = doc.querySelectorAll('script');
+                        scriptTags.forEach(script => {
+                            if (script.textContent.trim()) {
+                                try {
+                                    eval(script.textContent);
+                                } catch (e) {
+                                    console.error('編集画面JavaScript実行エラー:', e);
+                                }
+                            }
+                        });
+                    } else {
+                        console.error('編集コンテンツが見つかりません');
+                        mainContent.innerHTML = `
+                            <div class="alert alert-warning">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                問題編集画面の読み込みに失敗しました。
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    mainContent.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-circle me-2"></i>
+                            エラーが発生しました: ${error.message}
+                        </div>
+                    `;
+                });
+        }
+
+        // グローバル関数として定義（問題一覧から呼び出し可能）
+        window.loadQuestionEdit = loadQuestionEdit;
     </script>
 </body>
 </html>
