@@ -15,10 +15,10 @@ class HistoryQuizSeeder extends Seeder
      */
     public function run(): void
     {
-        // 最初のユーザーを取得（テスト用）
-        $user = User::first();
+        // ユーザーID 4を取得（テスト用）
+        $user = User::find(4);
         if (!$user) {
-            $this->command->warn('ユーザーが見つかりません。先にUserSeederを実行してください。');
+            $this->command->warn('ユーザーID 4が見つかりません。先にUserSeederを実行してください。');
             return;
         }
 

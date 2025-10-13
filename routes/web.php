@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\ProblemsController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -40,22 +41,7 @@ Route::middleware('auth')->group(function () {
     })->name('dashboard');
     
     // 問題一覧
-    Route::get('/problems', function () {
-        try {
-            // ジャンルと問題を取得（15件ずつページング）
-            $genres = \App\Models\Genre::ordered()->get();
-            $quizQuestions = \App\Models\QuizQuestion::with(['genre', 'user', 'choices'])->paginate(15);
-            
-            return view('problems.index', compact('genres', 'quizQuestions'));
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => '問題一覧の取得に失敗しました',
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine()
-            ], 500);
-        }
-    })->name('problems.index');
+    Route::get('/problems', [ProblemsController::class, 'index'])->name('problems.index');
     
     // 問題作成
     Route::get('/problems/create', function () {

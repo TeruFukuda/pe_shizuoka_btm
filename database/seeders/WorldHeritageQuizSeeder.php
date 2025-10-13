@@ -117,7 +117,7 @@ class WorldHeritageQuizSeeder extends Seeder
 
         foreach ($questions as $questionData) {
             $question = QuizQuestion::create([
-                'user_id' => 1, // 最初のユーザーを出題者として設定
+                'user_id' => 2, // ユーザーID 2を出題者として設定
                 'question' => $questionData['question'],
                 'genre_id' => $genre->id,
             ]);

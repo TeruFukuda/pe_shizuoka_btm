@@ -15,10 +15,10 @@ class GeographyQuizSeeder extends Seeder
      */
     public function run(): void
     {
-        // 最初のユーザーを取得（テスト用）
-        $user = User::first();
+        // ユーザーID 3を取得（テスト用）
+        $user = User::find(3);
         if (!$user) {
-            $this->command->warn('ユーザーが見つかりません。先にUserSeederを実行してください。');
+            $this->command->warn('ユーザーID 3が見つかりません。先にUserSeederを実行してください。');
             return;
         }
 

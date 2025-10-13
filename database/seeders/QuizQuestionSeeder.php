@@ -14,10 +14,10 @@ class QuizQuestionSeeder extends Seeder
      */
     public function run(): void
     {
-        // 最初のユーザーを取得（テスト用）
-        $user = User::first();
+        // ユーザーID 1を取得（テスト用）
+        $user = User::find(1);
         if (!$user) {
-            $this->command->warn('ユーザーが見つかりません。先にUserSeederを実行してください。');
+            $this->command->warn('ユーザーID 1が見つかりません。先にUserSeederを実行してください。');
             return;
         }
 

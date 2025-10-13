@@ -6,22 +6,32 @@
 
     <div class="problems-content">
         <!-- 検索・フィルター -->
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-search"></i></span>
-                    <input type="text" class="form-control" placeholder="問題を検索..." id="searchInput">
+        <form method="GET" action="{{ route('problems.index') }}" id="filterForm" onsubmit="return false;">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" 
+                               class="form-control" 
+                               name="search" 
+                               placeholder="問題を検索..." 
+                               value="{{ $currentSearch }}"
+                               id="searchInput">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <select class="form-select" name="genre_id" id="genreFilter">
+                        <option value="">すべてのジャンル</option>
+                        @foreach($genres as $genre)
+                            <option value="{{ $genre->id }}" 
+                                    {{ $currentGenreId == $genre->id ? 'selected' : '' }}>
+                                {{ $genre->name }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
-            <div class="col-md-6">
-                <select class="form-select" id="genreFilter">
-                    <option value="">すべてのジャンル</option>
-                    @foreach($genres as $genre)
-                        <option value="{{ $genre->id }}">{{ $genre->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-        </div>
+        </form>
 
         <!-- 問題一覧 -->
         <div class="problems-list">
@@ -96,7 +106,7 @@
                             </li>
                         @else
                             <li class="page-item">
-                                <a class="page-link pagination-link" href="#" data-page="{{ $quizQuestions->currentPage() - 1 }}">前へ</a>
+                                <a class="page-link" href="{{ $quizQuestions->previousPageUrl() }}">前へ</a>
                             </li>
                         @endif
 
@@ -107,14 +117,14 @@
                                 </li>
                             @else
                                 <li class="page-item">
-                                    <a class="page-link pagination-link" href="#" data-page="{{ $page }}">{{ $page }}</a>
+                                    <a class="page-link" href="{{ $quizQuestions->url($page) }}">{{ $page }}</a>
                                 </li>
                             @endif
                         @endforeach
 
                         @if($quizQuestions->hasMorePages())
                             <li class="page-item">
-                                <a class="page-link pagination-link" href="#" data-page="{{ $quizQuestions->currentPage() + 1 }}">次へ</a>
+                                <a class="page-link" href="{{ $quizQuestions->nextPageUrl() }}">次へ</a>
                             </li>
                         @else
                             <li class="page-item disabled">
@@ -213,97 +223,10 @@
 </style>
 
 <script>
-console.log('JavaScript読み込み開始');
-
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOMContentLoaded イベント発火');
-    
-    const searchInput = document.getElementById('searchInput');
-    const genreFilter = document.getElementById('genreFilter');
-    const emptyState = document.getElementById('emptyState');
-    
-    console.log('要素取得結果:', {
-        searchInput: searchInput,
-        genreFilter: genreFilter,
-        emptyState: emptyState
-    });
-
-    function filterProblems() {
-        const searchTerm = searchInput.value.toLowerCase();
-        const selectedGenreId = genreFilter.value;
-        
-        console.log('フィルター実行:', { searchTerm, selectedGenreId });
-        
-        // テーブル行を取得
-        const tableRows = document.querySelectorAll('#problemsTableBody tr');
-        let visibleCount = 0;
-
-        console.log('見つかったテーブル行数:', tableRows.length);
-
-        tableRows.forEach((row, index) => {
-            const questionText = row.cells[1].textContent.toLowerCase(); // 問題列（2番目の列）
-            const genreId = row.dataset.genreId;
-
-            const matchesSearch = searchTerm === '' || questionText.includes(searchTerm);
-            const matchesGenre = selectedGenreId === '' || genreId === selectedGenreId;
-
-            console.log(`行${index + 1}:`, {
-                questionText: questionText.substring(0, 50) + '...',
-                genreId,
-                matchesSearch,
-                matchesGenre
-            });
-
-            if (matchesSearch && matchesGenre) {
-                row.style.display = '';
-                visibleCount++;
-            } else {
-                row.style.display = 'none';
-            }
-        });
-
-        console.log('表示される行数:', visibleCount);
-
-        // 空の状態表示の切り替え
-        if (visibleCount === 0) {
-            emptyState.style.display = 'block';
-        } else {
-            emptyState.style.display = 'none';
-        }
-    }
-
-    // イベントリスナーの追加
-    if (searchInput) {
-        console.log('検索ボックスのイベントリスナーを追加');
-        searchInput.addEventListener('input', function(e) {
-            console.log('検索ボックス入力イベント:', e.target.value);
-            filterProblems();
-        });
-    } else {
-        console.error('検索ボックスが見つかりません');
-    }
-    
-    if (genreFilter) {
-        console.log('ジャンルフィルターのイベントリスナーを追加');
-        genreFilter.addEventListener('change', function(e) {
-            console.log('ジャンルフィルター変更イベント:', e.target.value);
-            filterProblems();
-        });
-    } else {
-        console.error('ジャンルフィルターが見つかりません');
-    }
-    
-    // 初期化時にフィルターを実行
-    console.log('初期化時にフィルターを実行');
-    filterProblems();
-});
-
 // 問題の編集
 function editQuestion(questionId) {
     console.log('問題編集:', questionId);
     // TODO: 問題編集画面を実装
     alert('問題編集機能は準備中です。問題ID: ' + questionId);
 }
-
-console.log('JavaScript読み込み完了');
 </script>

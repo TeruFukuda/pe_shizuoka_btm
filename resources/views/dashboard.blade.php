@@ -330,8 +330,16 @@
         }
 
         // 問題一覧ページ表示関数
-        function loadProblemListPage(page = 1) {
+        function loadProblemListPage(page = 1, search = '', genreId = '') {
+            console.log('loadProblemListPage関数が呼び出されました:', { page, search, genreId });
+            
             const mainContent = document.getElementById('mainContent');
+            console.log('mainContent要素:', mainContent);
+            
+            if (!mainContent) {
+                console.error('mainContent要素が見つかりません');
+                return;
+            }
             
             // ローディング表示
             mainContent.innerHTML = `
@@ -343,10 +351,21 @@
                 </div>
             `;
             
-            console.log('問題一覧の読み込み開始 (ページ:', page, ')');
+            console.log('問題一覧の読み込み開始 (ページ:', page, ', 検索:', search, ', ジャンル:', genreId, ')');
+            
+            // クエリパラメータを構築
+            const params = new URLSearchParams();
+            if (page > 1) params.append('page', page);
+            if (search) params.append('search', search);
+            if (genreId) params.append('genre_id', genreId);
+            
+            const queryString = params.toString();
+            const url = `/problems${queryString ? '?' + queryString : ''}`;
+            
+            console.log('リクエストURL:', url);
             
             // AJAXで問題一覧を取得
-            fetch(`/problems?page=${page}`)
+            fetch(url)
                 .then(response => {
                     console.log('レスポンス受信:', response.status, response.statusText);
                     
@@ -411,11 +430,61 @@
                 emptyState: emptyState
             });
 
+            // 既存のイベントリスナーを削除（重複を防ぐ）
+            if (searchInput) {
+                searchInput.removeEventListener('input', searchInput._debouncedHandler);
+            }
+            if (genreFilter) {
+                genreFilter.removeEventListener('change', genreFilter._changeHandler);
+            }
+            
+            // サーバーサイドフィルタリングを使用するため、クライアントサイドフィルタリング関数は削除
+
+            // サーバーサイドフィルタリングを使用するため、クライアントサイドフィルタリングは無効化
+            console.log('サーバーサイドフィルタリングを使用します');
+            
+            // ページネーションリンクのイベントリスナーを設定
+            const paginationLinks = document.querySelectorAll('.pagination .page-link[href]');
+            console.log('ページネーションリンク数:', paginationLinks.length);
+            
+            paginationLinks.forEach((link, index) => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const href = this.getAttribute('href');
+                    console.log(`ページネーションリンク${index + 1}クリック:`, href);
+                    
+                    // URLからページ番号を抽出
+                    const urlParams = new URLSearchParams(href.split('?')[1] || '');
+                    const page = parseInt(urlParams.get('page')) || 1;
+                    
+                    // フィルター条件を取得
+                    const searchInput = document.getElementById('searchInput');
+                    const genreFilter = document.getElementById('genreFilter');
+                    const search = searchInput ? searchInput.value : '';
+                    const genreId = genreFilter ? genreFilter.value : '';
+                    
+                    console.log('フィルター条件:', { page, search, genreId });
+                    loadProblemListPage(page, search, genreId);
+                });
+            });
+            
+            // フィルターフォームの送信処理を無効化
+            const filterForm = document.getElementById('filterForm');
+            if (filterForm) {
+                console.log('フィルターフォームの送信を無効化');
+                filterForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    console.log('フィルターフォーム送信を防止');
+                    return false;
+                });
+            }
+            
+            // クライアントサイドフィルタリング関数
             function filterProblems() {
-                const searchTerm = searchInput.value.toLowerCase();
-                const selectedGenreId = genreFilter.value;
+                const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+                const selectedGenreId = genreFilter ? genreFilter.value : '';
                 
-                console.log('フィルター実行:', { searchTerm, selectedGenreId });
+                console.log('クライアントサイドフィルタリング実行:', { searchTerm, selectedGenreId });
                 
                 // テーブル行を取得
                 const tableRows = document.querySelectorAll('#problemsTableBody tr');
@@ -430,13 +499,6 @@
                     const matchesSearch = searchTerm === '' || questionText.includes(searchTerm);
                     const matchesGenre = selectedGenreId === '' || genreId === selectedGenreId;
 
-                    console.log(`行${index + 1}:`, {
-                        questionText: questionText.substring(0, 50) + '...',
-                        genreId,
-                        matchesSearch,
-                        matchesGenre
-                    });
-
                     if (matchesSearch && matchesGenre) {
                         row.style.display = '';
                         visibleCount++;
@@ -448,50 +510,57 @@
                 console.log('表示される行数:', visibleCount);
 
                 // 空の状態表示の切り替え
-                if (visibleCount === 0) {
-                    emptyState.style.display = 'block';
-                } else {
-                    emptyState.style.display = 'none';
+                if (emptyState) {
+                    if (visibleCount === 0) {
+                        emptyState.style.display = 'block';
+                    } else {
+                        emptyState.style.display = 'none';
+                    }
                 }
             }
-
-            // イベントリスナーの追加
-            if (searchInput) {
-                console.log('検索ボックスのイベントリスナーを追加');
-                searchInput.addEventListener('input', function(e) {
-                    console.log('検索ボックス入力イベント:', e.target.value);
-                    filterProblems();
-                });
-            } else {
-                console.error('検索ボックスが見つかりません');
-            }
             
+            // ジャンルフィルターのリアルタイム処理
             if (genreFilter) {
-                console.log('ジャンルフィルターのイベントリスナーを追加');
-                genreFilter.addEventListener('change', function(e) {
-                    console.log('ジャンルフィルター変更イベント:', e.target.value);
+                console.log('ジャンルフィルターのリアルタイム処理を追加');
+                const changeHandler = function(e) {
+                    console.log('ジャンルフィルター変更:', e.target.value);
                     filterProblems();
-                });
+                };
+                
+                // 既存のイベントリスナーを削除
+                genreFilter.removeEventListener('change', genreFilter._changeHandler);
+                genreFilter._changeHandler = changeHandler;
+                genreFilter.addEventListener('change', changeHandler);
             } else {
                 console.error('ジャンルフィルターが見つかりません');
             }
             
-            // ページネーションリンクのイベントリスナーを設定
-            const paginationLinks = document.querySelectorAll('.pagination-link[data-page]');
-            console.log('ページネーションリンク数:', paginationLinks.length);
+            // 検索ボックスのリアルタイム処理
+            if (searchInput) {
+                console.log('検索ボックスのリアルタイム処理を追加');
+                let searchTimeout;
+                const inputHandler = function(e) {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        console.log('検索ボックス入力:', e.target.value);
+                        filterProblems();
+                    }, 300); // 300ms後に実行（デバウンス）
+                };
+                
+                // 既存のイベントリスナーを削除
+                searchInput.removeEventListener('input', searchInput._debouncedHandler);
+                searchInput._debouncedHandler = inputHandler;
+                searchInput.addEventListener('input', inputHandler);
+            } else {
+                console.error('検索ボックスが見つかりません');
+            }
             
-            paginationLinks.forEach((link, index) => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const page = parseInt(this.getAttribute('data-page'));
-                    console.log(`ページネーションリンク${index + 1}クリック:`, page);
-                    loadProblemListPage(page);
-                });
-            });
-            
-            // 初期化時にフィルターを実行
-            console.log('初期化時にフィルターを実行');
+            // 初期化時にフィルタリングを実行
+            console.log('初期化時にクライアントサイドフィルタリングを実行');
             filterProblems();
+            
+            // クライアントサイドフィルタリングを使用
+            console.log('クライアントサイドフィルタリングを使用します');
         }
 
         // 問題作成表示関数
