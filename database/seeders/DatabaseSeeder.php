@@ -13,11 +13,17 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // 最初にユーザーを作成
+        $this->call(UserSeeder::class);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // ジャンルのシード
+        $this->call(GenreSeeder::class);
+        
+        // 各ジャンルのクイズ問題のシード
+        $this->call(MathQuizSeeder::class);
+        $this->call(HistoryQuizSeeder::class);
+        $this->call(GeographyQuizSeeder::class);
+        $this->call(ScienceQuizSeeder::class);
+        $this->call(WorldHeritageQuizSeeder::class);
     }
 }

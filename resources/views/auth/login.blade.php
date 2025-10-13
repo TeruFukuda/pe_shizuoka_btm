@@ -81,7 +81,7 @@
             </form>
             
             <div class="login-footer">
-                <p>アカウントをお持ちでない場合は <a href="#" class="register-link">新規登録</a></p>
+                <p>アカウントをお持ちでない場合は <a href="{{ route('register') }}" class="register-link">新規登録</a></p>
             </div>
         </div>
     </div>

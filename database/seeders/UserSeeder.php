@@ -15,25 +15,23 @@ class UserSeeder extends Seeder
     {
         // 管理者ユーザー
         User::create([
-            'username' => 'admin',
+            'name' => '管理者',
             'email' => 'admin@example.com',
             'password' => Hash::make('password123'),
-            'full_name' => '管理者',
         ]);
 
-        // 一般ユーザー
+        // 一般ユーザー1
         User::create([
-            'username' => 'user1',
+            'name' => 'テストユーザー1',
             'email' => 'user1@example.com',
             'password' => Hash::make('password123'),
-            'full_name' => 'テストユーザー1',
         ]);
 
+        // 一般ユーザー2
         User::create([
-            'username' => 'user2',
+            'name' => 'テストユーザー2',
             'email' => 'user2@example.com',
             'password' => Hash::make('password123'),
-            'full_name' => 'テストユーザー2',
         ]);
     }
 }
