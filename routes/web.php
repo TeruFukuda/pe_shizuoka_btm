@@ -3,7 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\PasswordResetController;
-use App\Http\Controllers\ProblemsController;
+use App\Http\Controllers\QuestionsController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -38,27 +38,59 @@ Route::middleware('auth')->group(function () {
     // ダッシュボード
     Route::get('/dashboard', function () {
         $genres = \App\Models\Genre::active()->ordered()->get();
-        return view('dashboard', compact('genres'));
+        
+        // 出題状況のデータを取得
+        $user = auth()->user();
+        
+        // ユーザーの出題状況（ジャンル別）
+        $userGenreStats = \App\Models\QuizQuestion::where('user_id', $user->id)
+            ->join('genres', 'quiz_questions.genre_id', '=', 'genres.id')
+            ->selectRaw('genres.name, genres.id, COUNT(*) as count')
+            ->groupBy('genres.id', 'genres.name')
+            ->get()
+            ->keyBy('id');
+        
+        // 全体の出題状況（ジャンル別）
+        $totalGenreStats = \App\Models\QuizQuestion::join('genres', 'quiz_questions.genre_id', '=', 'genres.id')
+            ->selectRaw('genres.name, genres.id, COUNT(*) as count')
+            ->groupBy('genres.id', 'genres.name')
+            ->get()
+            ->keyBy('id');
+        
+        // 最近の出題傾向データ
+        $recentStats = [
+            'total_questions' => \App\Models\QuizQuestion::where('created_at', '>=', now()->subDays(30))->count(),
+            'user_questions' => \App\Models\QuizQuestion::where('user_id', $user->id)
+                ->where('created_at', '>=', now()->subDays(30))->count(),
+            'most_popular_genre' => \App\Models\QuizQuestion::join('genres', 'quiz_questions.genre_id', '=', 'genres.id')
+                ->where('quiz_questions.created_at', '>=', now()->subDays(30))
+                ->selectRaw('genres.name, COUNT(*) as count')
+                ->groupBy('genres.id', 'genres.name')
+                ->orderBy('count', 'desc')
+                ->first()?->name ?? 'データなし'
+        ];
+        
+        return view('dashboard', compact('genres', 'userGenreStats', 'totalGenreStats', 'recentStats'));
     })->name('dashboard');
     
     // 問題一覧
-    Route::get('/problems', [ProblemsController::class, 'index'])->name('problems.index');
+    Route::get('/questions', [QuestionsController::class, 'index'])->name('questions.index');
     
     // 問題作成
-    Route::get('/problems/create', function () {
-        return view('problems.create');
-    })->name('problems.create');
+    Route::get('/questions/create', function () {
+        return view('questions.create');
+    })->name('questions.create');
     
     // 問題選択
-    Route::get('/problems/select', function () {
-        return view('problems.select');
-    })->name('problems.select');
+    Route::get('/questions/select', function () {
+        return view('questions.select');
+    })->name('questions.select');
     
     // 問題編集
-    Route::get('/problems/{question}/edit', function (\App\Models\QuizQuestion $question) {
+    Route::get('/questions/{question}/edit', function (\App\Models\QuizQuestion $question) {
         $genres = \App\Models\Genre::ordered()->get();
-        return view('problems.edit', compact('question', 'genres'));
-    })->name('problems.edit');
+        return view('questions.edit', compact('question', 'genres'));
+    })->name('questions.edit');
     
     // ジャンル管理
     Route::get('/genres', function () {

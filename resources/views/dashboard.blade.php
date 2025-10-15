@@ -75,6 +75,94 @@
             margin-left: 250px;
             min-height: 100vh;
             transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        /* ページング機能のスタイル */
+        .pagination-container {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .pagination-page {
+            display: none;
+            transition: all 0.5s ease-in-out;
+        }
+        
+        .pagination-page.active {
+            display: block;
+        }
+        
+        .pagination-page.slide-left {
+            transform: translateX(-100%);
+        }
+        
+        .pagination-page.slide-right {
+            transform: translateX(100%);
+        }
+        
+        .pagination-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(102, 126, 234, 0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        
+        .pagination-nav:hover {
+            background: rgba(102, 126, 234, 1);
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .pagination-nav.prev {
+            left: 20px;
+        }
+        
+        .pagination-nav.next {
+            right: 20px;
+        }
+        
+        .pagination-container:hover .pagination-nav {
+            opacity: 1;
+        }
+        
+        .pagination-indicator {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+        
+        .pagination-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(102, 126, 234, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .pagination-dot.active {
+            background: rgba(102, 126, 234, 1);
+        }
+        
+        .pagination-dot:hover {
+            background: rgba(102, 126, 234, 0.7);
         }
         
         .dashboard-header {
@@ -207,75 +295,145 @@
     <div class="container">
         <!-- メインコンテンツエリア -->
         <div id="mainContent">
-            <div class="welcome-card" id="dashboardContent">
-                
-                <!-- 解答状況と未解答問題のカード -->
-                <div class="row mt-4">
-                    <div class="col-md-6">
-                        <div class="card h-100">
-                            <div class="card-body">
-                                <h5 class="card-title">解答状況</h5>
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span>・あなたが解答した問題数</span>
-                                    <span class="fw-bold">23/64問</span>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span>・あなたの正解率</span>
-                                    <span class="fw-bold">73%</span>
-                                </div>
-                                <hr>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span>・前回解答日</span>
-                                    <span class="fw-bold">2025/02/18</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card h-100">
-                            <div class="card-body">
-                                <h5 class="card-title">未解答問題</h5>
-                                <div class="text-end">
-                                    <div class="mb-1">No.104</div>
-                                    <div class="mb-1">No.103</div>
-                                    <div class="mb-1">No.102</div>
-                                    <div class="mb-1">No.101</div>
-                                    <div class="mb-1">No.100</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- レーダーチャート -->
-                <div class="row mt-4">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title">能力分析</h5>
-                                <div class="row">
-                                    <div class="col-md-8">
-                                        <canvas id="radarChart" width="400" height="300"></canvas>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <h6>各分野の習熟度</h6>
-                                        @php
-                                            $badgeColors = ['bg-primary', 'bg-success', 'bg-info', 'bg-warning', 'bg-danger', 'bg-secondary', 'bg-dark'];
-                                        @endphp
-                                        @foreach($genres as $index => $genre)
-                                        <div class="mb-2">
-                                            <span class="badge {{ $badgeColors[$index % count($badgeColors)] }} me-2">{{ $genre->name }}</span>
-                                            <span class="fw-bold" data-genre-id="{{ $genre->id }}">85%</span>
+            <div class="pagination-container" id="dashboardPagination">
+                <!-- ページ1: 解答状況と能力分析 -->
+                <div class="pagination-page active" id="page1">
+                    <div class="welcome-card">
+                        <!-- 解答状況と未解答問題のカード -->
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title">解答状況</h5>
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span>・あなたが解答した問題数</span>
+                                            <span class="fw-bold">23/64問</span>
                                         </div>
-                                        @endforeach
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span>・あなたの正解率</span>
+                                            <span class="fw-bold">73%</span>
+                                        </div>
+                                        <hr>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span>・前回解答日</span>
+                                            <span class="fw-bold">2025/02/18</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title">未解答問題</h5>
+                                        <div class="text-end">
+                                            <div class="mb-1">No.104</div>
+                                            <div class="mb-1">No.103</div>
+                                            <div class="mb-1">No.102</div>
+                                            <div class="mb-1">No.101</div>
+                                            <div class="mb-1">No.100</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- レーダーチャート -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">能力分析</h5>
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                <canvas id="radarChart" width="400" height="300"></canvas>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <h6>各分野の習熟度</h6>
+                                                @php
+                                                    $badgeColors = ['bg-primary', 'bg-success', 'bg-info', 'bg-warning', 'bg-danger', 'bg-secondary', 'bg-dark'];
+                                                @endphp
+                                                @foreach($genres as $index => $genre)
+                                                <div class="mb-2">
+                                                    <span class="badge {{ $badgeColors[$index % count($badgeColors)] }} me-2">{{ $genre->name }}</span>
+                                                    <span class="fw-bold" data-genre-id="{{ $genre->id }}">85%</span>
+                                                </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-               
-             </div>
+                
+                <!-- ページ2: 出題情報 -->
+                <div class="pagination-page" id="page2">
+                    <div class="welcome-card">
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">出題情報</h5>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <h6>最近の出題傾向</h6>
+                                                <div class="mb-3">
+                                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                                        <span>・過去30日間の出題数</span>
+                                                        <span class="fw-bold">{{ $recentStats['total_questions'] }}問</span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                                        <span>・あなたの出題数</span>
+                                                        <span class="fw-bold">{{ $recentStats['user_questions'] }}問</span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span>・最も出題されたジャンル</span>
+                                                        <span class="fw-bold">{{ $recentStats['most_popular_genre'] }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6>今後の出題予定</h6>
+                                                <div class="mb-3">
+                                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                                        <span>・次回出題予定日</span>
+                                                        <span class="fw-bold">2025/02/25</span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                                        <span>・予定問題数</span>
+                                                        <span class="fw-bold">25問</span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span>・重点分野</span>
+                                                        <span class="fw-bold">ネットワーク</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ページングナビゲーション -->
+                <button class="pagination-nav prev" id="prevPage">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <button class="pagination-nav next" id="nextPage">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+                
+                <!-- ページインジケーター -->
+                <div class="pagination-indicator">
+                    <div class="pagination-dot active" data-page="1"></div>
+                    <div class="pagination-dot" data-page="2"></div>
+                </div>
+            </div>
+        </div>
 
             @if (session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -351,79 +509,179 @@
         function showDashboard() {
             const mainContent = document.getElementById('mainContent');
             mainContent.innerHTML = `
-                <div class="welcome-card" id="dashboardContent">
-                    <!-- 解答状況と未解答問題のカード -->
-                    <div class="row mt-4">
-                        <div class="col-md-6">
-                            <div class="card h-100">
-                                <div class="card-body">
-                                    <h5 class="card-title">解答状況</h5>
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span>・あなたが解答した問題数</span>
-                                        <span class="fw-bold">23/64問</span>
+                <div class="pagination-container" id="dashboardPagination">
+                    <!-- ページ1: 解答状況と能力分析 -->
+                    <div class="pagination-page active" id="page1">
+                        <div class="welcome-card">
+                            <!-- 解答状況と未解答問題のカード -->
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h5 class="card-title">解答状況</h5>
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span>・あなたが解答した問題数</span>
+                                                <span class="fw-bold">23/64問</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span>・あなたの正解率</span>
+                                                <span class="fw-bold">73%</span>
+                                            </div>
+                                            <hr>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span>・前回解答日</span>
+                                                <span class="fw-bold">2025/02/18</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span>・あなたの正解率</span>
-                                        <span class="fw-bold">73%</span>
-                                    </div>
-                                    <hr>
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span>・前回解答日</span>
-                                        <span class="fw-bold">2025/02/18</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h5 class="card-title">未解答問題</h5>
+                                            <div class="text-end">
+                                                <div class="mb-1">No.104</div>
+                                                <div class="mb-1">No.103</div>
+                                                <div class="mb-1">No.102</div>
+                                                <div class="mb-1">No.101</div>
+                                                <div class="mb-1">No.100</div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card h-100">
-                                <div class="card-body">
-                                    <h5 class="card-title">未解答問題</h5>
-                                    <div class="text-end">
-                                        <div class="mb-1">No.104</div>
-                                        <div class="mb-1">No.103</div>
-                                        <div class="mb-1">No.102</div>
-                                        <div class="mb-1">No.101</div>
-                                        <div class="mb-1">No.100</div>
+                            
+                            <!-- レーダーチャート -->
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">能力分析</h5>
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <canvas id="radarChart" width="400" height="300"></canvas>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <h6>各分野の習熟度</h6>
+                                                    @php
+                                                        $badgeColors = ['bg-primary', 'bg-success', 'bg-info', 'bg-warning', 'bg-danger', 'bg-secondary', 'bg-dark'];
+                                                    @endphp
+                                                    @foreach($genres as $index => $genre)
+                                                    <div class="mb-2">
+                                                        <span class="badge {{ $badgeColors[$index % count($badgeColors)] }} me-2">{{ $genre->name }}</span>
+                                                        <span class="fw-bold" data-genre-id="{{ $genre->id }}">85%</span>
+                                                    </div>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                
-                <!-- レーダーチャート -->
-                <div class="row mt-4">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title">能力分析</h5>
-                                <div class="row">
-                                    <div class="col-md-8">
-                                        <canvas id="radarChart" width="400" height="300"></canvas>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <h6>各分野の習熟度</h6>
-                                        @php
-                                            $badgeColors = ['bg-primary', 'bg-success', 'bg-info', 'bg-warning', 'bg-danger', 'bg-secondary', 'bg-dark'];
-                                        @endphp
-                                        @foreach($genres as $index => $genre)
-                                        <div class="mb-2">
-                                            <span class="badge {{ $badgeColors[$index % count($badgeColors)] }} me-2">{{ $genre->name }}</span>
-                                            <span class="fw-bold" data-genre-id="{{ $genre->id }}">85%</span>
+                    
+                    <!-- ページ2: 出題情報 -->
+                    <div class="pagination-page" id="page2">
+                        <div class="welcome-card">
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">出題情報</h5>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <h6>最近の出題傾向</h6>
+                                                    <div class="mb-3">
+                                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                                        <span>・過去30日間の出題数</span>
+                                                        <span class="fw-bold">{{ $recentStats['total_questions'] }}問</span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                                        <span>・あなたの出題数</span>
+                                                        <span class="fw-bold">{{ $recentStats['user_questions'] }}問</span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span>・最も出題されたジャンル</span>
+                                                        <span class="fw-bold">{{ $recentStats['most_popular_genre'] }}</span>
+                                                    </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <h6>今後の出題予定</h6>
+                                                    <div class="mb-3">
+                                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                                            <span>・次回出題予定日</span>
+                                                            <span class="fw-bold">2025/02/25</span>
+                                                        </div>
+                                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                                            <span>・予定問題数</span>
+                                                            <span class="fw-bold">25問</span>
+                                                        </div>
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <span>・重点分野</span>
+                                                            <span class="fw-bold">ネットワーク</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- ジャンルごとの出題状況グラフ -->
+                                            <div class="row mt-4">
+                                                <div class="col-12">
+                                                    <h6>ジャンルごとの出題状況</h6>
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <h6 class="text-center mb-3">あなたの出題状況</h6>
+                                                            <div style="height: 300px;">
+                                                                <canvas id="userGenreChart"></canvas>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <h6 class="text-center mb-3">全体の出題状況</h6>
+                                                            <div style="height: 300px;">
+                                                                <canvas id="totalGenreChart"></canvas>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
                                         </div>
-                                        @endforeach
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    
+                    <!-- ページングナビゲーション -->
+                    <button class="pagination-nav prev" id="prevPage">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <button class="pagination-nav next" id="nextPage">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                    
+                    <!-- ページインジケーター -->
+                    <div class="pagination-indicator">
+                        <div class="pagination-dot active" data-page="1"></div>
+                        <div class="pagination-dot" data-page="2"></div>
                     </div>
                 </div>
             `;
             
-            // レーダーチャートを初期化
+            // レーダーチャートとページング機能を初期化
             setTimeout(() => {
                 initRadarChart();
+                initPagination();
+                // ページ2のグラフも初期化
+                initGenreCharts();
             }, 100);
+            
+            // 初期表示時にもグラフを初期化
+            setTimeout(() => {
+                initGenreCharts();
+            }, 500);
         }
 
         // 問題一覧表示関数
@@ -462,7 +720,7 @@
             if (genreId) params.append('genre_id', genreId);
             
             const queryString = params.toString();
-            const url = `/problems${queryString ? '?' + queryString : ''}`;
+            const url = `/questions${queryString ? '?' + queryString : ''}`;
             
             console.log('リクエストURL:', url);
             
@@ -484,7 +742,7 @@
                     // レスポンスから問題一覧部分のみを抽出
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(html, 'text/html');
-                    const problemContent = doc.querySelector('.problems-container');
+                    const problemContent = doc.querySelector('.questions-container');
                     
                     console.log('問題コンテンツ要素:', problemContent);
                     
@@ -589,7 +847,7 @@
                 console.log('クライアントサイドフィルタリング実行:', { searchTerm, selectedGenreId });
                 
                 // テーブル行を取得
-                const tableRows = document.querySelectorAll('#problemsTableBody tr');
+                const tableRows = document.querySelectorAll('#questionsTableBody tr');
                 let visibleCount = 0;
 
                 console.log('見つかったテーブル行数:', tableRows.length);
@@ -680,7 +938,7 @@
             `;
             
             // AJAXで問題作成画面を取得
-            fetch('/problems/create')
+            fetch('/questions/create')
                 .then(response => response.text())
                 .then(html => {
                     // レスポンスから問題作成部分のみを抽出
@@ -725,7 +983,7 @@
             `;
             
             // AJAXで問題選択画面を取得
-            fetch('/problems/select')
+            fetch('/questions/select')
                 .then(response => response.text())
                 .then(html => {
                     // レスポンスから問題選択部分のみを抽出
@@ -1108,7 +1366,7 @@
             console.log('問題一覧の読み込み開始 (ページ:', page, ')');
             
             // AJAXで問題一覧を取得
-            fetch(`/problems?page=${page}`)
+            fetch(`/questions?page=${page}`)
                 .then(response => {
                     console.log('レスポンス受信:', response.status, response.statusText);
                     
@@ -1124,7 +1382,7 @@
                     // レスポンスから問題一覧部分のみを抽出
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(html, 'text/html');
-                    const problemContent = doc.querySelector('.problems-container');
+                    const problemContent = doc.querySelector('.questions-container');
                     
                     if (problemContent) {
                         console.log('問題一覧を表示');
@@ -1209,7 +1467,7 @@
                 </div>
             `;
             
-            fetch(`/problems/${questionId}/edit`)
+            fetch(`/questions/${questionId}/edit`)
                 .then(response => {
                     console.log('編集画面レスポンス受信:', response.status, response.statusText);
                     if (!response.ok) {
@@ -1221,7 +1479,7 @@
                     console.log('編集画面HTMLレスポンス受信:', html.length, '文字');
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(html, 'text/html');
-                    const editContent = doc.querySelector('.problems-edit-container');
+                    const editContent = doc.querySelector('.questions-edit-container');
                     
                     if (editContent) {
                         console.log('問題編集画面を表示');
@@ -1326,9 +1584,234 @@
             });
         }
 
-        // ページ読み込み時にレーダーチャートを初期化
+        // ページング機能の実装
+        let currentPage = 1;
+        const totalPages = 2;
+        
+        function initPagination() {
+            const prevBtn = document.getElementById('prevPage');
+            const nextBtn = document.getElementById('nextPage');
+            const dots = document.querySelectorAll('.pagination-dot');
+            const container = document.getElementById('dashboardPagination');
+            
+            // 前のページボタン
+            if (prevBtn) {
+                prevBtn.addEventListener('click', function() {
+                    if (currentPage > 1) {
+                        goToPage(currentPage - 1);
+                    }
+                });
+            }
+            
+            // 次のページボタン
+            if (nextBtn) {
+                nextBtn.addEventListener('click', function() {
+                    if (currentPage < totalPages) {
+                        goToPage(currentPage + 1);
+                    }
+                });
+            }
+            
+            // ドットクリック
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', function() {
+                    goToPage(index + 1);
+                });
+            });
+            
+            // マウスカーソルによるページ切り替え
+            if (container) {
+                container.addEventListener('mousemove', function(e) {
+                    const rect = container.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const width = rect.width;
+                    
+                    // 右端20%の範囲で次のページボタンを表示
+                    if (x > width * 0.8 && currentPage < totalPages) {
+                        nextBtn.style.opacity = '1';
+                        nextBtn.style.transform = 'translateY(-50%) scale(1.1)';
+                    } else {
+                        nextBtn.style.opacity = '0';
+                        nextBtn.style.transform = 'translateY(-50%) scale(1)';
+                    }
+                    
+                    // 左端20%の範囲で前のページボタンを表示
+                    if (x < width * 0.2 && currentPage > 1) {
+                        prevBtn.style.opacity = '1';
+                        prevBtn.style.transform = 'translateY(-50%) scale(1.1)';
+                    } else {
+                        prevBtn.style.opacity = '0';
+                        prevBtn.style.transform = 'translateY(-50%) scale(1)';
+                    }
+                });
+                
+                // マウスが離れたらボタンを隠す
+                container.addEventListener('mouseleave', function() {
+                    prevBtn.style.opacity = '0';
+                    nextBtn.style.opacity = '0';
+                    prevBtn.style.transform = 'translateY(-50%) scale(1)';
+                    nextBtn.style.transform = 'translateY(-50%) scale(1)';
+                });
+            }
+        }
+        
+        function goToPage(page) {
+            if (page < 1 || page > totalPages) return;
+            
+            const currentPageElement = document.getElementById(`page${currentPage}`);
+            const targetPageElement = document.getElementById(`page${page}`);
+            const currentDot = document.querySelector(`.pagination-dot[data-page="${currentPage}"]`);
+            const targetDot = document.querySelector(`.pagination-dot[data-page="${page}"]`);
+            
+            if (currentPageElement && targetPageElement) {
+                // 現在のページを非アクティブに
+                currentPageElement.classList.remove('active');
+                if (currentDot) currentDot.classList.remove('active');
+                
+                // アニメーション効果
+                if (page > currentPage) {
+                    currentPageElement.classList.add('slide-left');
+                    targetPageElement.classList.add('slide-right');
+                } else {
+                    currentPageElement.classList.add('slide-right');
+                    targetPageElement.classList.add('slide-left');
+                }
+                
+                // 少し遅延してからページを切り替え
+                setTimeout(() => {
+                    currentPageElement.classList.remove('slide-left', 'slide-right');
+                    targetPageElement.classList.remove('slide-left', 'slide-right');
+                    targetPageElement.classList.add('active');
+                    if (targetDot) targetDot.classList.add('active');
+                    
+                    currentPage = page;
+                    
+                    // ページ2の場合はジャンルグラフを初期化
+                    if (page === 2) {
+                        setTimeout(() => {
+                            initGenreCharts();
+                        }, 100);
+                    }
+                    
+                }, 250);
+            }
+        }
+        
+        // ジャンルごとの出題状況グラフの初期化
+        function initGenreCharts() {
+            // サーバーから送信されたデータを使用
+            const userGenreStats = @json($userGenreStats);
+            const totalGenreStats = @json($totalGenreStats);
+            const genres = @json($genres);
+            
+            console.log('ジャンルグラフ初期化:', { userGenreStats, totalGenreStats, genres });
+            
+            const genreNames = [];
+            const userData = [];
+            const totalData = [];
+            
+            // ジャンルごとにデータを整理
+            genres.forEach(genre => {
+                genreNames.push(genre.name);
+                userData.push(userGenreStats[genre.id]?.count || 0);
+                totalData.push(totalGenreStats[genre.id]?.count || 0);
+            });
+            
+            // ユーザーの出題状況グラフ
+            const userCtx = document.getElementById('userGenreChart');
+            if (userCtx) {
+                console.log('ユーザーグラフ初期化中...', { genreNames, userData });
+                new Chart(userCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: genreNames,
+                        datasets: [{
+                            label: '出題数',
+                            data: userData,
+                            backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                            borderColor: 'rgba(102, 126, 234, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        aspectRatio: 1.5,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                }
+                            },
+                            y: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // 全体の出題状況グラフ
+            const totalCtx = document.getElementById('totalGenreChart');
+            if (totalCtx) {
+                console.log('全体グラフ初期化中...', { genreNames, totalData });
+                new Chart(totalCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: genreNames,
+                        datasets: [{
+                            label: '出題数',
+                            data: totalData,
+                            backgroundColor: 'rgba(40, 167, 69, 0.8)',
+                            borderColor: 'rgba(40, 167, 69, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        aspectRatio: 1.5,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                }
+                            },
+                            y: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        
+        // ページ読み込み時にレーダーチャートとページング機能を初期化
         document.addEventListener('DOMContentLoaded', function() {
             initRadarChart();
+            initPagination();
+            // ジャンルグラフも初期化
+            setTimeout(() => {
+                initGenreCharts();
+            }, 200);
         });
     </script>
 </body>

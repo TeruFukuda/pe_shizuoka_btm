@@ -1,12 +1,12 @@
-<div class="problems-container">
-    <div class="problems-header">
+<div class="questions-container">
+    <div class="questions-header">
         <h2><i class="bi bi-file-text me-2"></i>作成済み問題一覧</h2>
         <p class="text-muted">これまでに作成した問題の一覧です。</p>
     </div>
 
-    <div class="problems-content">
+    <div class="questions-content">
         <!-- 検索・フィルター -->
-        <form method="GET" action="{{ route('problems.index') }}" id="filterForm" onsubmit="return false;">
+        <form method="GET" action="{{ route('questions.index') }}" id="filterForm" onsubmit="return false;">
             <div class="row mb-4">
                 <div class="col-md-6">
                     <div class="input-group">
@@ -34,7 +34,7 @@
         </form>
 
         <!-- 問題一覧 -->
-        <div class="problems-list">
+        <div class="questions-list">
             @if($quizQuestions && $quizQuestions->count() > 0)
             <div class="table-responsive">
                 <table class="table table-striped table-hover">
@@ -47,7 +47,7 @@
                             <th>操作</th>
                         </tr>
                     </thead>
-                    <tbody id="problemsTableBody">
+                    <tbody id="questionsTableBody">
                         @foreach($quizQuestions as $question)
                         <tr data-genre-id="{{ $question->genre_id ?? '' }}">
                             <td>{{ $question->id }}</td>
@@ -140,11 +140,11 @@
 </div>
 
 <style>
-.problems-container {
+.questions-container {
     padding: 2rem;
 }
 
-.problems-header {
+.questions-header {
     margin-bottom: 2rem;
     padding-bottom: 1rem;
     border-bottom: 2px solid #e9ecef;
@@ -202,7 +202,7 @@
 }
 
 @media (max-width: 768px) {
-    .problems-container {
+    .questions-container {
         padding: 1rem;
     }
     

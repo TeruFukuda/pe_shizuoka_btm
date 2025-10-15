@@ -6,7 +6,7 @@ use App\Models\Genre;
 use App\Models\QuizQuestion;
 use Illuminate\Http\Request;
 
-class ProblemsController extends Controller
+class QuestionsController extends Controller
 {
     /**
      * 問題一覧を表示
@@ -38,7 +38,7 @@ class ProblemsController extends Controller
             $currentGenreId = $request->genre_id ?? '';
             $currentSearch = $request->search ?? '';
             
-            return view('problems.index', compact('genres', 'quizQuestions', 'currentGenreId', 'currentSearch'));
+            return view('questions.index', compact('genres', 'quizQuestions', 'currentGenreId', 'currentSearch'));
             
         } catch (\Exception $e) {
             return response()->json([
