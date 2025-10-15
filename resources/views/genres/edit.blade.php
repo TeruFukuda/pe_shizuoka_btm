@@ -5,9 +5,6 @@
                 <h2><i class="bi bi-pencil-square me-2"></i>ジャンル編集</h2>
                 <p class="text-muted">ジャンル「{{ $genre->name }}」を編集します。</p>
             </div>
-            <a href="{{ route('genres.index') }}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i>一覧に戻る
-            </a>
         </div>
     </div>
 

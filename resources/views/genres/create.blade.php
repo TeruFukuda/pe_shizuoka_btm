@@ -5,9 +5,6 @@
                 <h2><i class="bi bi-plus-circle me-2"></i>ジャンル新規登録</h2>
                 <p class="text-muted">新しいジャンルを登録します。</p>
             </div>
-            <a href="{{ route('genres.index') }}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i>一覧に戻る
-            </a>
         </div>
     </div>
 
