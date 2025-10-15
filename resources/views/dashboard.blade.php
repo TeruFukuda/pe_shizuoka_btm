@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ダッシュボード - PE静岡</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             background-color: #f8f9fa;
@@ -187,7 +188,11 @@
                     <h1 class="mb-0">ダッシュボード</h1>
                     <p class="mb-0">PE静岡システムへようこそ</p>
                 </div>
-                <div class="col-auto">
+                <div class="col-auto d-flex align-items-center">
+                    <span class="me-3 text-white">
+                        <i class="bi bi-person-circle me-1"></i>
+                        {{ Auth::user()->name }}さん
+                    </span>
                     <form method="POST" action="{{ route('logout') }}" class="d-inline">
                         @csrf
                         <button type="submit" class="logout-btn">
@@ -203,27 +208,74 @@
         <!-- メインコンテンツエリア -->
         <div id="mainContent">
             <div class="welcome-card" id="dashboardContent">
-                <h2>ようこそ、{{ Auth::user()->name }}さん！</h2>
-                <p class="text-muted">ログインが成功しました。</p>
                 
+                <!-- 解答状況と未解答問題のカード -->
                 <div class="row mt-4">
                     <div class="col-md-6">
-                        <h5>ユーザー情報</h5>
-                        <ul class="list-unstyled">
-                            <li><strong>名前:</strong> {{ Auth::user()->name }}</li>
-                            <li><strong>メールアドレス:</strong> {{ Auth::user()->email }}</li>
-                            <li><strong>登録日:</strong> {{ Auth::user()->created_at->format('Y年m月d日') }}</li>
-                        </ul>
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">解答状況</h5>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span>・あなたが解答した問題数</span>
+                                    <span class="fw-bold">23/64問</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span>・あなたの正解率</span>
+                                    <span class="fw-bold">73%</span>
+                                </div>
+                                <hr>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>・前回解答日</span>
+                                    <span class="fw-bold">2025/02/18</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="col-md-6">
-                        <h5>システム情報</h5>
-                        <ul class="list-unstyled">
-                            <li><strong>ログイン時刻:</strong> {{ now()->format('Y年m月d日 H:i:s') }}</li>
-                            <li><strong>セッションID:</strong> {{ session()->getId() }}</li>
-                        </ul>
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">未解答問題</h5>
+                                <div class="text-end">
+                                    <div class="mb-1">No.104</div>
+                                    <div class="mb-1">No.103</div>
+                                    <div class="mb-1">No.102</div>
+                                    <div class="mb-1">No.101</div>
+                                    <div class="mb-1">No.100</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
+                
+                <!-- レーダーチャート -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">能力分析</h5>
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <canvas id="radarChart" width="400" height="300"></canvas>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h6>各分野の習熟度</h6>
+                                        @php
+                                            $badgeColors = ['bg-primary', 'bg-success', 'bg-info', 'bg-warning', 'bg-danger', 'bg-secondary', 'bg-dark'];
+                                        @endphp
+                                        @foreach($genres as $index => $genre)
+                                        <div class="mb-2">
+                                            <span class="badge {{ $badgeColors[$index % count($badgeColors)] }} me-2">{{ $genre->name }}</span>
+                                            <span class="fw-bold" data-genre-id="{{ $genre->id }}">85%</span>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+               
+             </div>
 
             @if (session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -300,28 +352,78 @@
             const mainContent = document.getElementById('mainContent');
             mainContent.innerHTML = `
                 <div class="welcome-card" id="dashboardContent">
-                    <h2>ようこそ、{{ Auth::user()->name }}さん！</h2>
-                    <p class="text-muted">ログインが成功しました。</p>
-                    
+                    <!-- 解答状況と未解答問題のカード -->
                     <div class="row mt-4">
                         <div class="col-md-6">
-                            <h5>ユーザー情報</h5>
-                            <ul class="list-unstyled">
-                                <li><strong>名前:</strong> {{ Auth::user()->name }}</li>
-                                <li><strong>メールアドレス:</strong> {{ Auth::user()->email }}</li>
-                                <li><strong>登録日:</strong> {{ Auth::user()->created_at->format('Y年m月d日') }}</li>
-                            </ul>
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">解答状況</h5>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>・あなたが解答した問題数</span>
+                                        <span class="fw-bold">23/64問</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>・あなたの正解率</span>
+                                        <span class="fw-bold">73%</span>
+                                    </div>
+                                    <hr>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span>・前回解答日</span>
+                                        <span class="fw-bold">2025/02/18</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-md-6">
-                            <h5>システム情報</h5>
-                            <ul class="list-unstyled">
-                                <li><strong>ログイン時刻:</strong> ${new Date().toLocaleString('ja-JP')}</li>
-                                <li><strong>セッションID:</strong> {{ session()->getId() }}</li>
-                            </ul>
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">未解答問題</h5>
+                                    <div class="text-end">
+                                        <div class="mb-1">No.104</div>
+                                        <div class="mb-1">No.103</div>
+                                        <div class="mb-1">No.102</div>
+                                        <div class="mb-1">No.101</div>
+                                        <div class="mb-1">No.100</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- レーダーチャート -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">能力分析</h5>
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <canvas id="radarChart" width="400" height="300"></canvas>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h6>各分野の習熟度</h6>
+                                        @php
+                                            $badgeColors = ['bg-primary', 'bg-success', 'bg-info', 'bg-warning', 'bg-danger', 'bg-secondary', 'bg-dark'];
+                                        @endphp
+                                        @foreach($genres as $index => $genre)
+                                        <div class="mb-2">
+                                            <span class="badge {{ $badgeColors[$index % count($badgeColors)] }} me-2">{{ $genre->name }}</span>
+                                            <span class="fw-bold" data-genre-id="{{ $genre->id }}">85%</span>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             `;
+            
+            // レーダーチャートを初期化
+            setTimeout(() => {
+                initRadarChart();
+            }, 100);
         }
 
         // 問題一覧表示関数
@@ -1159,6 +1261,75 @@
 
         // グローバル関数として定義（問題一覧から呼び出し可能）
         window.loadQuestionEdit = loadQuestionEdit;
+
+        // レーダーチャートの初期化
+        function initRadarChart() {
+            const ctx = document.getElementById('radarChart');
+            if (!ctx) return;
+
+            // ジャンルデータを取得
+            const genreElements = document.querySelectorAll('[data-genre-id]');
+            const labels = [];
+            const data = [];
+            
+            genreElements.forEach(element => {
+                const genreName = element.previousElementSibling.textContent.trim();
+                const genreValue = parseInt(element.textContent.replace('%', ''));
+                labels.push(genreName);
+                data.push(genreValue);
+            });
+
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '習熟度',
+                        data: data,
+                        backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(102, 126, 234, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(102, 126, 234, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            min: 0,
+                            ticks: {
+                                stepSize: 20,
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            angleLines: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ページ読み込み時にレーダーチャートを初期化
+        document.addEventListener('DOMContentLoaded', function() {
+            initRadarChart();
+        });
     </script>
 </body>
 </html>

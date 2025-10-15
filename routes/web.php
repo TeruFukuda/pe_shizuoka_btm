@@ -37,7 +37,8 @@ Route::middleware('auth')->group(function () {
     
     // ダッシュボード
     Route::get('/dashboard', function () {
-        return view('dashboard');
+        $genres = \App\Models\Genre::active()->ordered()->get();
+        return view('dashboard', compact('genres'));
     })->name('dashboard');
     
     // 問題一覧
