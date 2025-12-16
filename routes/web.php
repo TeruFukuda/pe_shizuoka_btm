@@ -34,14 +34,14 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-    
+
     // ダッシュボード
     Route::get('/dashboard', function () {
         $genres = \App\Models\Genre::active()->ordered()->get();
-        
+
         // 出題状況のデータを取得
         $user = auth()->user();
-        
+
         // ユーザーの出題状況（ジャンル別）
         $userGenreStats = \App\Models\QuizQuestion::where('user_id', $user->id)
             ->join('genres', 'quiz_questions.genre_id', '=', 'genres.id')
@@ -49,14 +49,14 @@ Route::middleware('auth')->group(function () {
             ->groupBy('genres.id', 'genres.name')
             ->get()
             ->keyBy('id');
-        
+
         // 全体の出題状況（ジャンル別）
         $totalGenreStats = \App\Models\QuizQuestion::join('genres', 'quiz_questions.genre_id', '=', 'genres.id')
             ->selectRaw('genres.name, genres.id, COUNT(*) as count')
             ->groupBy('genres.id', 'genres.name')
             ->get()
             ->keyBy('id');
-        
+
         // 最近の出題傾向データ
         $recentStats = [
             'total_questions' => \App\Models\QuizQuestion::where('created_at', '>=', now()->subDays(30))->count(),
@@ -69,29 +69,27 @@ Route::middleware('auth')->group(function () {
                 ->orderBy('count', 'desc')
                 ->first()?->name ?? 'データなし'
         ];
-        
+
         return view('dashboard', compact('genres', 'userGenreStats', 'totalGenreStats', 'recentStats'));
     })->name('dashboard');
-    
+
     // 問題一覧
     Route::get('/questions', [QuestionsController::class, 'index'])->name('questions.index');
-    
+
     // 問題作成
     Route::get('/questions/create', function () {
         return view('questions.create');
     })->name('questions.create');
-    
+
     // 問題選択
-    Route::get('/questions/select', function () {
-        return view('questions.select');
-    })->name('questions.select');
-    
+    Route::get('/questions/select', [QuestionsController::class, 'select'])->name('questions.select');
+
     // 問題編集
     Route::get('/questions/{question}/edit', function (\App\Models\QuizQuestion $question) {
         $genres = \App\Models\Genre::ordered()->get();
         return view('questions.edit', compact('question', 'genres'));
     })->name('questions.edit');
-    
+
     // ジャンル管理
     Route::get('/genres', function () {
         try {
@@ -102,7 +100,7 @@ Route::middleware('auth')->group(function () {
                     'message' => 'マイグレーションを実行してください: php artisan migrate'
                 ], 500);
             }
-            
+
             $genres = \App\Models\Genre::ordered()->get();
             return view('genres.index', compact('genres'));
         } catch (\Exception $e) {
@@ -113,37 +111,37 @@ Route::middleware('auth')->group(function () {
             ], 500);
         }
     })->name('genres.index');
-    
+
     Route::get('/genres/create', function () {
         return view('genres.create');
     })->name('genres.create');
-    
+
     Route::get('/genres/{genre}/edit', function (\App\Models\Genre $genre) {
         return view('genres.edit', compact('genre'));
     })->name('genres.edit');
-    
+
     Route::post('/genres', function (\Illuminate\Http\Request $request) {
         $request->validate([
             'name' => 'required|string|max:255',
             'sort_order' => 'required|integer|min:0',
             'is_disabled' => 'required|boolean',
         ]);
-        
+
         \App\Models\Genre::create($request->all());
-        
+
         return redirect()->route('genres.index')
             ->with('success', 'ジャンルが正常に登録されました。');
     })->name('genres.store');
-    
+
     Route::put('/genres/{genre}', function (\Illuminate\Http\Request $request, \App\Models\Genre $genre) {
         $request->validate([
             'name' => 'required|string|max:255',
             'sort_order' => 'required|integer|min:0',
             'is_disabled' => 'required|boolean',
         ]);
-        
+
         $genre->update($request->all());
-        
+
         return redirect()->route('genres.index')
             ->with('success', 'ジャンルが正常に更新されました。');
     })->name('genres.update');

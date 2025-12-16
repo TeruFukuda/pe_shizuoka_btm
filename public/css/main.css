@@ -1,0 +1,230 @@
+body {
+  background-color: #f8f9fa;
+  margin: 0;
+  padding: 0;
+}
+
+/* サイドバー */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 250px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  z-index: 1000;
+  transition: all 0.3s ease;
+  overflow-y: auto;
+}
+
+.sidebar-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.sidebar-menu {
+  padding: 1rem 0;
+}
+
+.menu-item {
+  display: block;
+  padding: 12px 20px;
+  color: white;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border-left: 3px solid transparent;
+}
+
+.menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-left-color: white;
+  color: white;
+  text-decoration: none;
+}
+
+.menu-item.active {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-left-color: white;
+}
+
+.menu-icon {
+  margin-right: 10px;
+  width: 20px;
+  text-align: center;
+}
+
+/* メインコンテンツ */
+.main-content {
+  margin-left: 250px;
+  min-height: 100vh;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+/* ページング機能のスタイル */
+.pagination-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.pagination-page {
+  display: none;
+  transition: all 0.5s ease-in-out;
+}
+
+.pagination-page.active {
+  display: block;
+}
+
+.pagination-page.slide-left {
+  transform: translateX(-100%);
+}
+
+.pagination-page.slide-right {
+  transform: translateX(100%);
+}
+
+.pagination-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(102, 126, 234, 0.8);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.pagination-nav:hover {
+  background: rgba(102, 126, 234, 1);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.pagination-nav.prev {
+  left: 20px;
+}
+
+.pagination-nav.next {
+  right: 20px;
+}
+
+.pagination-container:hover .pagination-nav {
+  opacity: 1;
+}
+
+.pagination-indicator {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 10;
+}
+
+.pagination-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(102, 126, 234, 0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pagination-dot.active {
+  background: rgba(102, 126, 234, 1);
+}
+
+.pagination-dot:hover {
+  background: rgba(102, 126, 234, 0.7);
+}
+
+.dashboard-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 2rem 0;
+  margin-bottom: 2rem;
+}
+
+.welcome-card {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.logout-btn {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  color: white;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+  color: white;
+}
+
+.genres-list {
+  width: 30%;
+}
+
+.genre--row {
+  cursor: pointer;
+}
+
+/* モバイル対応 */
+@media (max-width: 768px) {
+  .sidebar {
+      transform: translateX(-100%);
+  }
+
+  .sidebar.open {
+      transform: translateX(0);
+  }
+
+  .main-content {
+      margin-left: 0;
+  }
+
+  .mobile-menu-btn {
+      display: block;
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 1001;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px;
+      font-size: 1.2rem;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-menu-btn {
+      display: none;
+  }
+}
