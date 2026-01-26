@@ -1,3 +1,8 @@
+@extends('layouts.app')
+
+@section('title', '作成済み問題一覧')
+
+@section('content')
 <div class="questions-container">
     <div class="questions-header">
         <h2><i class="bi bi-file-text me-2"></i>作成済み問題一覧</h2>
@@ -5,16 +10,16 @@
     </div>
 
     <div class="questions-content">
-        <!-- 検索・フィルター -->
-        <form method="GET" action="{{ route('questions.index') }}" id="filterForm" onsubmit="return false;">
+        {{-- 検索・フィルターフォーム --}}
+        <form method="GET" action="{{ route('questions.index') }}" id="filterForm">
             <div class="row mb-4">
                 <div class="col-md-6">
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-search"></i></span>
-                        <input type="text" 
-                               class="form-control" 
-                               name="search" 
-                               placeholder="問題を検索..." 
+                        <input type="text"
+                               class="form-control"
+                               name="search"
+                               placeholder="問題をリアルタイム検索..."
                                value="{{ $currentSearch }}"
                                id="searchInput">
                     </div>
@@ -23,7 +28,7 @@
                     <select class="form-select" name="genre_id" id="genreFilter">
                         <option value="">すべてのジャンル</option>
                         @foreach($genres as $genre)
-                            <option value="{{ $genre->id }}" 
+                            <option value="{{ $genre->id }}"
                                     {{ $currentGenreId == $genre->id ? 'selected' : '' }}>
                                 {{ $genre->name }}
                             </option>
@@ -33,11 +38,10 @@
             </div>
         </form>
 
-        <!-- 問題一覧 -->
-        <div class="questions-list">
+        <div class="questions-list" id="questionsListWrapper">
             @if($quizQuestions && $quizQuestions->count() > 0)
-            <div class="table-responsive">
-                <table class="table table-striped table-hover">
+            <div class="table-responsive card">
+                <table class="table table-striped table-hover mb-0">
                     <thead class="table-dark">
                         <tr>
                             <th>ID</th>
@@ -49,184 +53,132 @@
                     </thead>
                     <tbody id="questionsTableBody">
                         @foreach($quizQuestions as $question)
-                        <tr data-genre-id="{{ $question->genre_id ?? '' }}">
+                        {{-- JSでフィルタリングしやすいように data属性を付与 --}}
+                        <tr class="question-row" data-genre-id="{{ $question->genre_id }}">
                             <td>{{ $question->id }}</td>
-                            <td>{{ Str::limit($question->question, 100) }}</td>
+                            <td class="question-text">{{ Str::limit($question->question, 80) }}</td>
                             <td>
                                 @if($question->genre)
-                                    <span class="badge bg-info">{{ $question->genre->name }}</span>
+                                    <span class="badge bg-info text-dark">{{ $question->genre->name }}</span>
                                 @else
                                     <span class="badge bg-secondary">未分類</span>
                                 @endif
                             </td>
-                            <td>{{ $question->created_at->format('Y年m月d日') }}</td>
+                            <td>{{ $question->created_at->format('Y/m/d') }}</td>
                             <td>
-                                <button type="button" class="btn btn-outline-success btn-sm" onclick="loadQuestionEdit({{ $question->id }})">
+                                <a href="{{ route('questions.edit', $question->id) }}" class="btn btn-outline-success btn-sm">
                                     <i class="bi bi-pencil"></i> 編集
-                                </button>
+                                </a>
                             </td>
                         </tr>
                         @endforeach
                     </tbody>
                 </table>
             </div>
+
+            {{-- 検索結果がゼロの時にJSで表示するための隠しメッセージ --}}
+            <div id="emptyState" class="text-center py-5 border rounded bg-light mt-3" style="display: none;">
+                <i class="bi bi-search display-1 text-muted"></i>
+                <h4 class="mt-3">一致する問題が見つかりません</h4>
+                <p class="text-muted">検索キーワードやジャンルを変えてみてください。</p>
+            </div>
+
+            <div class="mt-4 d-flex justify-content-center" id="paginationWrapper">
+                {{ $quizQuestions->appends(request()->query())->links('pagination::bootstrap-5') }}
+            </div>
+
             @else
-            <div class="text-center py-5">
+            <div class="text-center py-5 border rounded bg-light">
                 <i class="bi bi-inbox display-1 text-muted"></i>
-                <h4 class="mt-3">問題がありません</h4>
-                <p class="text-muted">まだ問題が作成されていません。</p>
-                <a href="#" class="btn btn-primary" onclick="loadProblemCreation()">
+                <h4 class="mt-3">問題がまだ登録されていません</h4>
+                <p class="text-muted">新しく作成して学習を始めましょう！</p>
+                <a href="{{ route('questions.create') }}" class="btn btn-primary">
                     <i class="bi bi-plus-circle me-1"></i>問題を作成
                 </a>
             </div>
             @endif
-
-            <!-- 空の状態表示 -->
-            <div id="emptyState" style="display: none;">
-                <div class="text-center py-5">
-                    <i class="bi bi-inbox display-1 text-muted"></i>
-                    <h4 class="mt-3">問題が見つかりません</h4>
-                    <p class="text-muted">検索条件を変更して再度お試しください。</p>
-                </div>
-            </div>
         </div>
-
-        <!-- ページネーション -->
-        @if($quizQuestions->hasPages())
-        <nav aria-label="問題一覧ページネーション" class="mt-4">
-            <div class="d-flex justify-content-between align-items-center">
-                <div class="text-muted">
-                    全 {{ $quizQuestions->total() }} 件中 {{ $quizQuestions->firstItem() }}-{{ $quizQuestions->lastItem() }} 件を表示
-                </div>
-                <div>
-                    <ul class="pagination pagination-sm mb-0">
-                        @if($quizQuestions->onFirstPage())
-                            <li class="page-item disabled">
-                                <span class="page-link">前へ</span>
-                            </li>
-                        @else
-                            <li class="page-item">
-                                <a class="page-link" href="{{ $quizQuestions->previousPageUrl() }}">前へ</a>
-                            </li>
-                        @endif
-
-                        @foreach($quizQuestions->getUrlRange(1, $quizQuestions->lastPage()) as $page => $url)
-                            @if($page == $quizQuestions->currentPage())
-                                <li class="page-item active">
-                                    <span class="page-link">{{ $page }}</span>
-                                </li>
-                            @else
-                                <li class="page-item">
-                                    <a class="page-link" href="{{ $quizQuestions->url($page) }}">{{ $page }}</a>
-                                </li>
-                            @endif
-                        @endforeach
-
-                        @if($quizQuestions->hasMorePages())
-                            <li class="page-item">
-                                <a class="page-link" href="{{ $quizQuestions->nextPageUrl() }}">次へ</a>
-                            </li>
-                        @else
-                            <li class="page-item disabled">
-                                <span class="page-link">次へ</span>
-                            </li>
-                        @endif
-                    </ul>
-                </div>
-            </div>
-        </nav>
-        @endif
     </div>
 </div>
+@endsection
 
-<style>
-.questions-container {
-    padding: 2rem;
-}
-
-.questions-header {
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 2px solid #e9ecef;
-}
-
-.problem-card {
-    transition: all 0.3s ease;
-    border: 1px solid #dee2e6;
-}
-
-.problem-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.problem-meta {
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid #f8f9fa;
-}
-
-.btn-group .btn {
-    flex: 1;
-}
-
-/* ページネーションのスタイル */
-.pagination {
-    margin-bottom: 0;
-}
-
-.pagination .page-link {
-    color: #0d6efd;
-    background-color: #fff;
-    border: 1px solid #dee2e6;
-    padding: 0.375rem 0.75rem;
-    font-size: 0.875rem;
-}
-
-.pagination .page-link:hover {
-    color: #0a58ca;
-    background-color: #e9ecef;
-    border-color: #dee2e6;
-}
-
-.pagination .page-item.active .page-link {
-    color: #fff;
-    background-color: #0d6efd;
-    border-color: #0d6efd;
-}
-
-.pagination .page-item.disabled .page-link {
-    color: #6c757d;
-    background-color: #fff;
-    border-color: #dee2e6;
-}
-
-@media (max-width: 768px) {
-    .questions-container {
-        padding: 1rem;
-    }
-    
-    .btn-group .btn {
-        font-size: 0.8rem;
-        padding: 0.25rem 0.5rem;
-    }
-    
-    .pagination {
-        justify-content: center;
-    }
-    
-    .pagination .page-link {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.8rem;
-    }
-}
-</style>
-
+@push('scripts')
 <script>
-// 問題の編集
-function editQuestion(questionId) {
-    console.log('問題編集:', questionId);
-    // TODO: 問題編集画面を実装
-    alert('問題編集機能は準備中です。問題ID: ' + questionId);
-}
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const genreFilter = document.getElementById('genreFilter');
+    const rows = document.querySelectorAll('.question-row');
+    const emptyState = document.getElementById('emptyState');
+    const tableCard = document.querySelector('.table-responsive');
+    const paginationWrapper = document.getElementById('paginationWrapper');
+
+    /**
+     * クライアントサイドでのリアルタイムフィルタリング
+     * ※ページを跨いでの検索が必要な場合はサーバー送信が必要ですが、
+     * 表示中のページ内で即座に絞り込むにはこれが最速です。
+     */
+    function filterProblems() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedGenre = genreFilter.value;
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const text = row.querySelector('.question-text').textContent.toLowerCase();
+            const genreId = row.dataset.genreId;
+
+            const matchesSearch = text.includes(searchTerm);
+            const matchesGenre = selectedGenre === "" || genreId === selectedGenre;
+
+            if (matchesSearch && matchesGenre) {
+                row.style.display = "";
+                visibleCount++;
+            } else {
+                row.style.display = "none";
+            }
+        });
+
+        // 全滅した時の表示切り替え
+        if (visibleCount === 0) {
+            if (tableCard) tableCard.style.display = "none";
+            if (paginationWrapper) paginationWrapper.style.display = "none";
+            emptyState.style.display = "block";
+        } else {
+            if (tableCard) tableCard.style.display = "block";
+            if (paginationWrapper) paginationWrapper.style.display = "flex";
+            emptyState.style.display = "none";
+        }
+    }
+
+    // 入力イベントにデバウンス（少し待ってから実行）をかけて負荷軽減
+    let timeout = null;
+    searchInput.addEventListener('input', () => {
+        clearTimeout(timeout);
+        timeout = setTimeout(filterProblems, 300);
+    });
+
+    // ジャンル変更時は即実行
+    genreFilter.addEventListener('change', filterProblems);
+
+    // フォームのEnterキーでの誤送信を防止（Ajax的な動きを優先）
+    document.getElementById('filterForm').addEventListener('submit', (e) => {
+        // もし完全にサーバーサイド検索に切り替えたい場合はここを削除
+        if (searchInput.value.length > 0) {
+            // そのまま送信（サーバーサイド検索実行）
+        } else {
+            e.preventDefault();
+        }
+    });
+});
 </script>
+@endpush
+
+@push('styles')
+<style>
+    .questions-container { padding: 1rem 0; }
+    .questions-header { margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 2px solid #e9ecef; }
+    .table th { font-weight: 600; }
+    .badge { font-weight: 500; }
+    /* 検索ヒット時のアニメーション */
+    .question-row { transition: opacity 0.2s ease; }
+</style>
+@endpush
