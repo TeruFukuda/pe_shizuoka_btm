@@ -41,7 +41,7 @@
 
     <div class="main-content">
         <div class="dashboard-header">
-            <h1>@yield('title')</h1>
+            <h1 class="ms-4">@yield('title')</h1>
         </div>
         <div class="container mt-4">
             @yield('content')
