@@ -251,23 +251,45 @@ document.addEventListener('DOMContentLoaded', function() {
 
 @push('styles')
 <style>
-    .pagination-container { position: relative; overflow: hidden; min-height: 500px; }
-    .pagination-page { display: none; }
-    .pagination-page.active { display: block; animation: fadeIn 0.4s ease-in-out; }
-
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-    .pagination-nav {
-        position: absolute; top: 50%; transform: translateY(-50%);
-        background: rgba(0,0,0,0.05); border: none; border-radius: 50%;
-        width: 50px; height: 50px; opacity: 0; transition: all 0.3s; z-index: 10;
+    /* 無駄な余白や演出をカット */
+    .dashboard-container {
+        padding: 1rem 0;
     }
-    .pagination-nav.prev { left: 10px; }
-    .pagination-nav.next { right: 10px; }
-    .pagination-nav:hover { background: rgba(0,0,0,0.1); transform: translateY(-50%) scale(1.1); }
 
-    .pagination-indicator { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
-    .pagination-dot { width: 12px; height: 12px; border-radius: 50%; background: #ddd; cursor: pointer; transition: 0.3s; }
-    .pagination-dot.active { background: #667eea; transform: scale(1.2); }
+    /* カードの浮かび上がり(hover)やフェードインを禁止 */
+    .card {
+        border-radius: 8px;
+        transition: none !important; /* アニメーション無効化 */
+        animation: none !important;  /* 浮かび上がり禁止 */
+    }
+
+    /* 統計数値のスタイル：パッと見てわかるように */
+    .stat-card .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0;
+    }
+
+    /* グラフエリアの高さ固定 */
+    .chart-container {
+        position: relative;
+        height: 300px;
+        width: 100%;
+    }
+
+    /* リストアイテムのホバーもシンプルに背景色のみ */
+    .list-group-item {
+        transition: none !important;
+    }
+    .list-group-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    /* 以前あったアニメーション用のクラスが残っていれば無効化 */
+    .fade-in, .up-reveal {
+        opacity: 1 !important;
+        transform: none !important;
+        visibility: visible !important;
+    }
 </style>
 @endpush
