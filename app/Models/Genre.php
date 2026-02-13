@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\QuizQuestion;
 
 class Genre extends Model
 {
@@ -40,5 +41,11 @@ class Genre extends Model
     public function scopeActive($query)
     {
         return $query->where('is_disabled', false);
+    }
+
+    public function quizQuestions()
+    {
+        // 1つのジャンルは、たくさんの（hasMany）問題を持っている
+        return $this->hasMany(QuizQuestion::class);
     }
 }

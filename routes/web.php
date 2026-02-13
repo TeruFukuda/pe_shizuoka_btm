@@ -31,12 +31,15 @@ Route::middleware('auth')->group(function () {
     // 問題管理（QuestionsControllerに集約されている前提）
     Route::prefix('questions')->name('questions.')->group(function () {
         Route::get('/', [QuestionsController::class, 'index'])->name('index');
-        Route::get('/create', [QuestionsController::class, 'create'])->name('create'); // ここもControllerへ！
+        Route::get('/create', [QuestionsController::class, 'create'])->name('create');
         Route::get('/select', [QuestionsController::class, 'select'])->name('select');
-        Route::post('/', [QuestionsController::class, 'store'])->name('store'); // 新規保存用
-        Route::put('/{question}', [QuestionsController::class, 'update'])->name('update'); // 編集保存用
-        Route::get('/{question}/edit', [QuestionsController::class, 'edit'])->name('edit'); // ここもControllerへ！
+        Route::post('/', [QuestionsController::class, 'store'])->name('store');
+        Route::put('/{question}', [QuestionsController::class, 'update'])->name('update');
+        Route::get('/{question}/edit', [QuestionsController::class, 'edit'])->name('edit');
     });
+
+    // 問題解答
+    Route::get('/api/genres/{genre}/questions', [QuestionsController::class, 'getListByGenre']);
 
     // ジャンル管理
     Route::resource('genres', GenreController::class)->except(['show', 'destroy']);

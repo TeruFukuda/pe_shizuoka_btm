@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Genre;
 use App\Models\QuizQuestion;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class QuestionsController extends Controller
 {
@@ -51,13 +52,19 @@ class QuestionsController extends Controller
     }
 
     /**
-     * ジャンル一覧を表示
+     * 問題一覧を表示
      */
     public function select(Request $request)
     {
         try {
-            // ジャンルを取得
-            $genres = Genre::ordered()->get();
+            $userId = Auth::id();
+
+            $genres = Genre::withCount(['quizQuestions as unanswered_count' => function ($query) use ($userId) {
+                // quiz_answersテーブルにログインユーザーの回答が存在しない問題のみをカウント
+                $query->whereDoesntHave('answers', function ($q) use ($userId) {
+                    $q->where('user_id', $userId);
+                });
+            }])->get();
 
             return view('questions.select', compact('genres'));
 
@@ -69,5 +76,14 @@ class QuestionsController extends Controller
                 'line' => $e->getLine()
             ], 500);
         }
+    }
+
+    /**
+     * 特定のジャンルの問題リストを返す
+     */
+    public function getListByGenre(Genre $genre)
+    {
+        // そのジャンルの問題を配列として返す（Laravelが自動でJSONにしてくれます）
+        return response()->json($genre->quizQuestions);
     }
 }
