@@ -63,7 +63,7 @@
                         @foreach($question->choices as $index => $choice)
                             <div class="choice-item mb-3 p-3 border rounded">
                                 <div class="row">
-                                    <div class="col-md-8">
+                                    <div class="col-md-7">
                                         <input 
                                             type="text" 
                                             class="form-control choice-text" 
@@ -88,10 +88,10 @@
                                             </label>
                                         </div>
                                     </div>
-                                    <div class="col-md-1">
+                                    <div class="col-md-2">
                                         @if($index > 1)
-                                            <button type="button" class="btn btn-outline-danger btn-sm remove-choice">
-                                                <i class="bi bi-trash"></i>
+                                            <button type="button" class="btn btn-outline-danger btn-sm remove-choice" title="この選択肢を削除">
+                                                <i class="bi bi-trash me-1"></i>削除
                                             </button>
                                         @endif
                                     </div>
@@ -141,7 +141,7 @@
                 choiceItem.className = 'choice-item mb-3 p-3 border rounded';
                 choiceItem.innerHTML = `
                     <div class="row">
-                        <div class="col-md-8">
+                        <div class="col-md-7">
                             <input type="text" class="form-control choice-text" name="choices[${choiceIndex}][text]" placeholder="選択肢${choiceIndex + 1}を入力" required>
                         </div>
                         <div class="col-md-3">
@@ -150,9 +150,9 @@
                                 <label class="form-check-label" for="correct_${choiceIndex}">正解</label>
                             </div>
                         </div>
-                        <div class="col-md-1">
-                            <button type="button" class="btn btn-outline-danger btn-sm remove-choice">
-                                <i class="bi bi-trash"></i>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-outline-danger btn-sm remove-choice" title="この選択肢を削除">
+                                <i class="bi bi-trash me-1"></i>削除
                             </button>
                         </div>
                     </div>
