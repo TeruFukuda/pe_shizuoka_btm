@@ -1,4 +1,4 @@
-<div class="problems-edit-container">
+<div class="questions-edit-container">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0">
             <i class="bi bi-pencil-square me-2"></i>
@@ -244,12 +244,12 @@
             </div>
         `;
         
-        fetch('/problems')
+        fetch('/questions')
             .then(response => response.text())
             .then(html => {
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
-                const problemContent = doc.querySelector('.problems-container');
+                const problemContent = doc.querySelector('.questions-container');
                 
                 if (problemContent) {
                     mainContent.innerHTML = problemContent.outerHTML;
