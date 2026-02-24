@@ -3,19 +3,34 @@
         <h2><i class="bi bi-plus-circle me-2"></i>問題作成</h2>
         <p class="text-muted">新しい問題を作成します。</p>
     </div>
-
     <div class="creation-content">
-        <div class="alert alert-info">
-            <i class="bi bi-info-circle me-2"></i>
-            問題作成機能は準備中です。今後、ここで新しい問題を作成できるようになります。
-        </div>
-        
         <div class="placeholder-content">
-            <div class="text-center py-5">
-                <i class="bi bi-file-plus display-1 text-muted"></i>
-                <h4 class="mt-3">問題作成</h4>
-                <p class="text-muted">この画面で問題を作成する機能が実装予定です。</p>
-            </div>
+            <form id="editQuestionForm">
+                @csrf
+                @method('PUT')
+
+                <!-- ジャンル選択 -->
+                <div class="mb-3">
+                    <label for="genre_id" class="form-label">ジャンル <span class="text-danger">*</span></label>
+                    <select class="form-select" id="genre_id" name="genre_id" required>
+                        <option value="">ジャンルを選択してください</option>
+                        @foreach($genres as $genre)
+                            <option value="{{ $genre->id }}"
+                                {{ old('genre_id') == $genre->id ? 'selected' : '' }}
+                                {{ $genre->is_disabled ? 'disabled' : '' }}
+                            >
+                                {{ $genre->name }}
+                                @if($genre->is_disabled)
+                                    (使用禁止)
+                                @endif
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('genre_id')
+                        <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
+                </div>
+            </form>
         </div>
     </div>
 </div>

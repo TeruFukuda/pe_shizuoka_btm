@@ -78,7 +78,8 @@ Route::middleware('auth')->group(function () {
 
     // 問題作成
     Route::get('/questions/create', function () {
-        return view('questions.create');
+        $genres = \App\Models\Genre::ordered()->get();
+        return view('questions.create', compact('genres'));
     })->name('questions.create');
 
     // 問題選択
