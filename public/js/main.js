@@ -353,37 +353,35 @@ function loadProblemSelection() {
       </div>
   `;
 
-  window.location.href = '/questions/select';
-
   // AJAXで問題選択画面を取得
-  // fetch('/questions/select')
-  //     .then(response => response.text())
-  //     .then(html => {
-  //         // レスポンスから問題選択部分のみを抽出
-  //         const parser = new DOMParser();
-  //         const doc = parser.parseFromString(html, 'text/html');
-  //         const selectionContent = doc.querySelector('.problem-selection-container');
+  fetch('/questions/select')
+      .then(response => response.text())
+      .then(html => {
+          // レスポンスから問題選択部分のみを抽出
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const selectionContent = doc.querySelector('.problem-selection-container');
 
-  //         if (selectionContent) {
-  //             mainContent.innerHTML = selectionContent.outerHTML;
-  //         } else {
-  //             mainContent.innerHTML = `
-  //                 <div class="alert alert-warning">
-  //                     <i class="bi bi-exclamation-triangle me-2"></i>
-  //                     問題選択画面の読み込みに失敗しました。
-  //                 </div>
-  //             `;
-  //         }
-  //     })
-  //     .catch(error => {
-  //         console.error('Error:', error);
-  //         mainContent.innerHTML = `
-  //             <div class="alert alert-danger">
-  //                 <i class="bi bi-exclamation-circle me-2"></i>
-  //                 エラーが発生しました。ページを再読み込みしてください。
-  //             </div>
-  //         `;
-  //     });
+          if (selectionContent) {
+              mainContent.innerHTML = selectionContent.outerHTML;
+          } else {
+              mainContent.innerHTML = `
+                  <div class="alert alert-warning">
+                      <i class="bi bi-exclamation-triangle me-2"></i>
+                      問題選択画面の読み込みに失敗しました。
+                  </div>
+              `;
+          }
+      })
+      .catch(error => {
+          console.error('Error:', error);
+          mainContent.innerHTML = `
+              <div class="alert alert-danger">
+                  <i class="bi bi-exclamation-circle me-2"></i>
+                  エラーが発生しました。ページを再読み込みしてください。
+              </div>
+          `;
+      });
 }
 
 // ジャンル一覧表示関数
@@ -424,6 +422,57 @@ function loadGenreList() {
                   <div class="alert alert-warning">
                       <i class="bi bi-exclamation-triangle me-2"></i>
                       ジャンル一覧の読み込みに失敗しました。
+                  </div>
+              `;
+          }
+      })
+      .catch(error => {
+          console.error('Error:', error);
+          mainContent.innerHTML = `
+              <div class="alert alert-danger">
+                  <i class="bi bi-exclamation-circle me-2"></i>
+                  エラーが発生しました: ${error.message}
+              </div>
+          `;
+      });
+}
+
+function showDashboard() {
+  const mainContent = document.getElementById('mainContent');
+
+  // ローディング表示
+  mainContent.innerHTML = `
+      <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">読み込み中...</span>
+          </div>
+          <p class="mt-3">ダッシュボードを読み込み中...</p>
+      </div>
+  `;
+
+  // AJAXでジャンル新規登録画面を取得
+  fetch('/dashboard')
+      .then(response => {
+          if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.text();
+      })
+      .then(html => {
+          // レスポンスからダッシュボード部分のみを抽出
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const createContent = doc.querySelector('.pagination-container');
+
+          if (createContent) {
+              mainContent.innerHTML = createContent.outerHTML;
+              initRadarChart();
+              initPagination();
+          } else {
+              mainContent.innerHTML = `
+                  <div class="alert alert-warning">
+                      <i class="bi bi-exclamation-triangle me-2"></i>
+                      ダッシュボードの読み込みに失敗しました。
                   </div>
               `;
           }
