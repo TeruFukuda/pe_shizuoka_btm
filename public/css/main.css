@@ -194,6 +194,26 @@ body {
   cursor: pointer;
 }
 
+/* 高さを500pxに固定 */
+.fixed-height-card {
+  height: 600px;
+}
+
+/* カードのボディ部分だけをスクロール可能にする */
+.scrollable-body {
+  overflow-y: auto;
+  height: calc(100% - 56px); /* ヘッダーの高さ分を引く */
+}
+
+/* スクロールバーの見た目をスッキリさせる（任意） */
+.scrollable-body::-webkit-scrollbar {
+  width: 6px;
+}
+.scrollable-body::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.1);
+  border-radius: 10px;
+}
+
 /* モバイル対応 */
 @media (max-width: 768px) {
   .sidebar {
