@@ -29,4 +29,11 @@ class QuizChoice extends Model
     {
         return $this->belongsTo(QuizQuestion::class);
     }
+
+    /**
+     * 解答とのリレーション
+     */
+    public function answers() {
+      return $this->hasMany(QuizAnswer::class);
+    }
 }

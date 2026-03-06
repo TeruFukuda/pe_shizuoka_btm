@@ -51,14 +51,29 @@ class QuestionsController extends Controller
     }
 
     /**
-     * ジャンル一覧を表示
+     * 問題選択画面を表示
      */
     public function select(Request $request)
     {
         try {
-            // ジャンルを取得
-            $genres = Genre::ordered()->get();
+            $userId = auth()->id();
 
+            $genres = Genre::withCount([
+                // 1. ジャンルに紐づく全問題数
+                'quizQuestions as total_count',
+
+                // 2. 解答済み（quiz_answersにレコードがある）問題数
+                'quizQuestions as answered_count' => function ($query) use ($userId) {
+                    $query->whereHas('choices.answers', function ($q) use ($userId) {
+                        $q->where('user_id', $userId);
+                    });
+                }
+            ])->get();
+
+            // 未解答数をプロパティとして追加
+            foreach ($genres as $genre) {
+                $genre->unanswered_count = $genre->total_count - $genre->answered_count;
+            }
             return view('questions.select', compact('genres'));
 
         } catch (\Exception $e) {

@@ -11,13 +11,38 @@
                     <div class="card-header bg-dark text-white">
                         <h5 class="mb-0">ジャンル一覧</h5>
                     </div>
-                    <div class="list-group list-group-flush scrollable-body" id="genreList">
-                        @foreach($genres as $genre)
-                        <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center genre-item" data-genre-id="{{ $genre->id }}">
-                            {{ $genre->name }}
-                            <span class="badge bg-secondary rounded-pill">5</span>
-                        </button>
-                        @endforeach
+                    <div class="table-responsive scrollable-body" id="genreList">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th scope="col" class="ps-3">ジャンル名</th>
+                                    <th scope="col" class="text-end pe-3">未解答問題数</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($genres as $genre)
+                                <tr class="genre-item cursor-pointer" data-genre-id="{{ $genre->id }}" style="cursor: pointer;">
+                                    <td class="ps-3 fw-bold text-dark">
+                                        {{ $genre->name }}
+                                    </td>
+                                    {{-- 右寄せ (text-end) 部分の修正 --}}
+                                    <td class="text-end pe-3">
+                                        @if($genre->unanswered_count > 0)
+                                            {{-- 背景をネイビー (#0d47a1など) に。文字は白 (text-white) --}}
+                                            <span class="badge rounded-pill shadow-sm" style="background-color: #0d47a1; color: white;">
+                                                {{ $genre->unanswered_count }}
+                                            </span>
+                                        @else
+                                            {{-- 完了時は変わらず緑で達成感を！ --}}
+                                            <span class="badge bg-success rounded-pill shadow-sm">
+                                                <i class="bi bi-check-lg"></i>
+                                            </span>
+                                        @endif
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
