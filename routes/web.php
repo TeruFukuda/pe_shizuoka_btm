@@ -83,6 +83,7 @@ Route::middleware('auth')->group(function () {
 
     // 問題選択
     Route::get('/questions/select', [QuestionsController::class, 'select'])->name('questions.select');
+    Route::get('/api/genres/{genreId}/questions', [QuestionsController::class, 'getQuestionsByGenre']);
 
     // 問題編集
     Route::get('/questions/{question}/edit', function (\App\Models\QuizQuestion $question) {

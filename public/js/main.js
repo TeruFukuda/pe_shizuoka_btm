@@ -1226,6 +1226,55 @@ function initGenreCharts() {
   }
 }
 
+// ジャンル選択したとき、そのジャンルの問題一覧を描画
+document.addEventListener('click', async (event) => {
+  // クリックされた要素、またはその親に .genre-item があるか探す
+  const button = event.target.closest('.genre-item');
+
+  // ジャンルボタン以外がクリックされたら何もしない
+  if (!button) return;
+
+  const genreId = button.dataset.genreId;
+  const questionsContainer = document.getElementById('questionsContainer');
+
+  if (!questionsContainer) return;
+
+  // アクティブ表示の切り替え
+  document.querySelectorAll('.genre-item').forEach(btn => btn.classList.remove('active'));
+  button.classList.add('active');
+
+  // ローディング表示
+  questionsContainer.innerHTML = '<div class="text-center p-5"><div class="spinner-border"></div></div>';
+
+  try {
+      const response = await fetch(`/api/genres/${genreId}/questions`);
+      const questions = await response.json();
+
+      // 描画処理
+      renderQuestionsList(questions, questionsContainer);
+  } catch (error) {
+      console.error('Error:', error);
+  }
+});
+
+function renderQuestionsList(questions, container) {
+  if (questions.length === 0) {
+      container.innerHTML = '<p class="p-5 text-center">問題がありません</p>';
+      return;
+  }
+  const html = questions.map(q => `
+        <a href="/questions/${q.id}" class="list-group-item list-group-item-action border-0 border-bottom p-3 quiz-link">
+            <div class="d-flex align-items-center">
+                <h6 class="mb-0 fw-bold text-primary text-decoration-underline">
+                    ${q.question}
+                </h6>
+            </div>
+        </a>
+    `).join('');
+
+    container.innerHTML = `<div class="list-group list-group-flush">${html}</div>`;
+}
+
 // ページ読み込み時にレーダーチャートとページング機能を初期化
 document.addEventListener('DOMContentLoaded', function() {
   initRadarChart();

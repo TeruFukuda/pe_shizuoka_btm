@@ -70,4 +70,16 @@ class QuestionsController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * ジャンルに紐づく問題一覧を取得
+     */
+    public function getQuestionsByGenre($genreId)
+    {
+        // ジャンルに紐づく問題を取得（リレーションが設定されている前提）
+        $questions = QuizQuestion::where('genre_id', $genreId)->get();
+
+        // JSON形式でレスポンスを返す
+        return response()->json($questions);
+    }
 }
