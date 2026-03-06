@@ -362,6 +362,18 @@ function loadProblemSelection() {
           const doc = parser.parseFromString(html, 'text/html');
           const selectionContent = doc.querySelector('.problem-selection-container');
 
+          // ブラウザのタブ名（<title>）を更新
+          const newTitle = doc.querySelector('title').innerText;
+          document.title = newTitle;
+
+          // 画面上の大見出し（@yield('title') の部分）を更新
+          // レイアウト側の <h1> の中身を書き換えます
+          const headerTitle = doc.querySelector('.dashboard-header h1');
+          if (headerTitle) {
+              // 現在の画面の h1 を、取得したHTMLの h1 の内容で書き換え
+              document.querySelector('.dashboard-header h1').innerText = headerTitle.innerText;
+          }
+
           if (selectionContent) {
               mainContent.innerHTML = selectionContent.outerHTML;
           } else {
@@ -463,6 +475,18 @@ function showDashboard() {
           const parser = new DOMParser();
           const doc = parser.parseFromString(html, 'text/html');
           const createContent = doc.querySelector('.pagination-container');
+
+          // ブラウザのタブ名（<title>）を更新
+          const newTitle = doc.querySelector('title').innerText;
+          document.title = newTitle;
+
+          // 画面上の大見出し（@yield('title') の部分）を更新
+          // レイアウト側の <h1> の中身を書き換えます
+          const headerTitle = doc.querySelector('.dashboard-header h1');
+          if (headerTitle) {
+              // 現在の画面の h1 を、取得したHTMLの h1 の内容で書き換え
+              document.querySelector('.dashboard-header h1').innerText = headerTitle.innerText;
+          }
 
           if (createContent) {
               mainContent.innerHTML = createContent.outerHTML;
