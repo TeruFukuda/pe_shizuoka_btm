@@ -84,6 +84,11 @@ Route::middleware('auth')->group(function () {
     // 問題選択
     Route::get('/questions/select', [QuestionsController::class, 'select'])->name('questions.select');
     Route::get('/api/genres/{genreId}/questions', [QuestionsController::class, 'getQuestionsNotAnsweredByGenre']);
+    // 問題解答画面のHTML（ページ全体、または mainContent 用の断片）を返す
+    Route::get('/questions/{question}/answer', [QuestionsController::class, 'answer'])->name('questions.answer');
+
+    // 解答の保存処理
+    Route::post('/answers', [AnswersController::class, 'store'])->name('answers.store');
 
     // 問題編集
     Route::get('/questions/{question}/edit', function (\App\Models\QuizQuestion $question) {

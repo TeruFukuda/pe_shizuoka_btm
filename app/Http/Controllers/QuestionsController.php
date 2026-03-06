@@ -102,4 +102,11 @@ class QuestionsController extends Controller
 
         return response()->json($questions);
     }
+
+    public function answer(QuizQuestion $question)
+    {
+        $question->load(['choices', 'genre']);
+
+        return view('questions.answer', compact('question'));
+    }
 }

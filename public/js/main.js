@@ -1263,17 +1263,49 @@ function renderQuestionsList(questions, container) {
       return;
   }
   const html = questions.map(q => `
-        <a href="/questions/${q.id}" class="list-group-item list-group-item-action border-0 border-bottom p-3 quiz-link">
-            <div class="d-flex align-items-center">
-                <h6 class="mb-0 fw-bold text-primary text-decoration-underline">
-                    ${q.question}
-                </h6>
-            </div>
-        </a>
-    `).join('');
+      <a href="javascript:void(0)"
+         onclick="loadAnswerPage(${q.id})"
+         class="list-group-item list-group-item-action border-0 border-bottom p-3">
+          <div class="d-flex align-items-center">
+              <h6 class="mb-0 fw-bold text-primary text-decoration-underline">
+                  ${q.question}
+              </h6>
+          </div>
+      </a>
+  `).join('');
 
-    container.innerHTML = `<div class="list-group list-group-flush">${html}</div>`;
+  container.innerHTML = `<div class="list-group list-group-flush">${html}</div>`;
 }
+
+// 問題解答画面への遷移
+window.loadAnswerPage = function(questionId) {
+  const mainContent = document.getElementById('mainContent');
+
+  mainContent.innerHTML = `
+      <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status"></div>
+          <p class="mt-3">問題を読み込み中...</p>
+      </div>
+  `;
+
+  // 解答画面のHTMLを取得
+  fetch(`/questions/${questionId}/answer`)
+      .then(response => response.text())
+      .then(html => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          // 解答画面のコンテナ（仮に .answer-container とする）を抽出
+          const answerContent = doc.querySelector('.answer-container');
+
+          if (answerContent) {
+              mainContent.innerHTML = answerContent.outerHTML;
+              // 解答画面専用の初期化関数があればここで呼ぶ
+          }
+      })
+      .catch(error => {
+          console.error('Error:', error);
+      });
+};
 
 // ページ読み込み時にレーダーチャートとページング機能を初期化
 document.addEventListener('DOMContentLoaded', function() {
