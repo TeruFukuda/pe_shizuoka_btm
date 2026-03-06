@@ -45,4 +45,16 @@ class QuizQuestion extends Model
     {
         return $this->belongsTo(Genre::class);
     }
+
+    // 選択肢を通じて解答履歴があるかを確認するリレーション
+    public function answers() {
+        return $this->hasManyThrough(
+            QuizAnswer::class,
+            QuizChoice::class,
+            'quiz_question_id', // quiz_choicesテーブルの外部キー
+            'quiz_choice_id',   // quiz_answersテーブルの外部キー
+            'id',               // quiz_questionsのローカルキー
+            'id'                // quiz_choicesのローカルキー
+        );
+    }
 }

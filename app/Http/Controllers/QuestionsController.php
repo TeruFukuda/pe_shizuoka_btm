@@ -87,14 +87,19 @@ class QuestionsController extends Controller
     }
 
     /**
-     * ジャンルに紐づく問題一覧を取得
+     * ジャンルに紐づく未解答問題一覧を取得
      */
-    public function getQuestionsByGenre($genreId)
+    public function getQuestionsNotAnsweredByGenre($genreId)
     {
-        // ジャンルに紐づく問題を取得（リレーションが設定されている前提）
-        $questions = QuizQuestion::where('genre_id', $genreId)->get();
+        $userId = auth()->id(); // または $request->user()->id
 
-        // JSON形式でレスポンスを返す
+        $questions = QuizQuestion::where('genre_id', $genreId)
+            ->whereDoesntHave('answers', function($query) use ($userId) {
+                $query->where('user_id', $userId);
+            })
+            ->with('choices')
+            ->get();
+
         return response()->json($questions);
     }
 }

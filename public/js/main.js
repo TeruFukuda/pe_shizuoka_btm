@@ -1226,7 +1226,7 @@ function initGenreCharts() {
   }
 }
 
-// ジャンル選択したとき、そのジャンルの問題一覧を描画
+// ジャンル選択したとき、そのジャンルの未解答問題一覧を描画
 document.addEventListener('click', async (event) => {
   // クリックされた要素、またはその親に .genre-item があるか探す
   const button = event.target.closest('.genre-item');
