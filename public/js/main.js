@@ -341,6 +341,16 @@ function loadProblemCreation() {
 
 // 問題選択表示関数
 function loadProblemSelection() {
+  // 強制的に黒い幕を消す（SPAでの安全策）
+  const backdrop = document.querySelector('.modal-backdrop');
+  if (backdrop) {
+      backdrop.remove();
+  }
+  // bodyのスクロールロックを解除
+  document.body.classList.remove('modal-open');
+  document.body.style.overflow = '';
+  document.body.style.paddingRight = '';
+
   const mainContent = document.getElementById('mainContent');
 
   // ローディング表示
@@ -1330,6 +1340,56 @@ window.loadAnswerPage = function(questionId) {
           console.error('Error:', error);
       });
 };
+
+// 解答結果モーダルの表示
+document.addEventListener('click', function(e) {
+
+  // 1. クリックされた要素が「回答する」ボタン（またはその中のアイコン）か判定
+  const submitBtn = e.target.closest('#submitBtn');
+
+  // ボタン以外がクリックされたら何もしない
+  if (!submitBtn) return;
+
+  // 2. 本来のフォーム送信（ページ遷移）を止める
+  e.preventDefault();
+
+  // 3. フォーム要素を取得
+  const answerForm = document.getElementById('answerForm');
+  if (!answerForm) return;
+
+  // 4. 選択されたラジオボタンを取得
+  const selectedRadio = answerForm.querySelector('input[name="choice_id"]:checked');
+
+  if (!selectedRadio) {
+      alert("選択肢を選んでください！");
+      return;
+  }
+
+  // 5. テキストの取得
+  const userText = selectedRadio.closest('.p-2').querySelector('.choice-text').innerText;
+  const correctRadio = answerForm.querySelector('input[data-is-correct="1"]');
+  const correctText = correctRadio.closest('.p-2').querySelector('.choice-text').innerText;
+
+  // 6. 正誤判定
+  const isCorrect = selectedRadio.getAttribute('data-is-correct') === "1";
+
+  // 7. モーダルへの反映
+  const modalElem = document.getElementById('resultModal');
+  const resultModal = bootstrap.Modal.getOrCreateInstance(modalElem);
+
+  document.getElementById('resultMessage').innerText = isCorrect ? "素晴らしい！　正解です。" : "残念！　不正解です。";
+  document.getElementById('userAnswerText').innerText = userText;
+  document.getElementById('correctAnswerText').innerText = correctText;
+
+  // アイコンの切り替え
+  const icon = document.getElementById('resultIcon');
+  icon.innerHTML = isCorrect
+      ? '<i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>'
+      : '<i class="bi bi-x-circle-fill text-danger" style="font-size: 5rem;"></i>';
+
+  // 8. 表示！
+  resultModal.show();
+});
 
 // ページ読み込み時にレーダーチャートとページング機能を初期化
 document.addEventListener('DOMContentLoaded', function() {
