@@ -12,7 +12,7 @@ class QuizAnswer extends Model
     use HasFactory;
 
     protected $fillable = [
-        'quiz_choices_id',
+        'quiz_choice_id',
         'user_id',
     ];
 

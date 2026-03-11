@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\QuestionsController;
+use App\Http\Controllers\QuizAnswersController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -81,14 +82,14 @@ Route::middleware('auth')->group(function () {
         return view('questions.create');
     })->name('questions.create');
 
-    // 問題選択
+    // 問題選択画面表示
     Route::get('/questions/select', [QuestionsController::class, 'select'])->name('questions.select');
     Route::get('/api/genres/{genreId}/questions', [QuestionsController::class, 'getQuestionsNotAnsweredByGenre']);
-    // 問題解答画面のHTML（ページ全体、または mainContent 用の断片）を返す
+    // 問題解答画面表示
     Route::get('/questions/{question}/answer', [QuestionsController::class, 'answer'])->name('questions.answer');
 
-    // 解答の保存処理
-    Route::post('/answers', [AnswersController::class, 'store'])->name('answers.store');
+    // 解答をDBに保存
+    Route::post('/quiz-answers/store', [QuizAnswersController::class, 'store'])->name('quiz_answers.store');
 
     // 問題編集
     Route::get('/questions/{question}/edit', function (\App\Models\QuizQuestion $question) {

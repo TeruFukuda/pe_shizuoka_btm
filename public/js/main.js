@@ -1353,29 +1353,38 @@ window.loadAnswerPage = function(questionId) {
 // 解答結果モーダルの表示
 document.addEventListener('click', function(e) {
 
-  // 1. クリックされた要素が「解答する」ボタン（またはその中のアイコン）か判定
   const submitBtn = e.target.closest('#submitBtn');
-
-  // ボタン以外がクリックされたら何もしない
   if (!submitBtn) return;
 
-  // 2. 本来のフォーム送信（ページ遷移）を止める
   e.preventDefault();
 
-  // 3. フォーム要素を取得
-  const answerForm = document.getElementById('answerForm');
-  if (!answerForm) return;
-
-  // 4. 選択されたラジオボタンを取得
-  const selectedRadio = answerForm.querySelector('input[name="choice_id"]:checked');
+  const form = document.getElementById('answerForm');
+  const selectedRadio = form.querySelector('input[name="choice_id"]:checked');
   const errorMsg = document.getElementById('select-error');
 
+  // 1. バリデーション
   if (!selectedRadio) {
-      if (errorMsg) errorMsg.classList.remove('d-none'); // メッセージを表示
+      if (errorMsg) errorMsg.classList.remove('d-none');
       return;
   } else {
-      if (errorMsg) errorMsg.classList.add('d-none'); // 選ばれたら隠す
+      if (errorMsg) errorMsg.classList.add('d-none');
   }
+
+  const choiceId = selectedRadio.value;
+
+  // 2. ★裏側でDBに保存（Ajax）
+  fetch('/quiz-answers/store', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+      },
+      body: JSON.stringify({ choice_id: choiceId })
+  })
+  .then(response => response.json())
+  .then(data => console.log('DB保存成功:', data))
+  .catch(error => console.error('DB保存失敗:', error));
+
   // 5. テキストの取得
   const userText = selectedRadio.closest('.p-2').querySelector('.choice-text').innerText;
   const correctRadio = answerForm.querySelector('input[data-is-correct="1"]');
