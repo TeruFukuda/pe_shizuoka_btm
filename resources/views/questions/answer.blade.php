@@ -6,7 +6,7 @@
                 <div class="fs-5 fw-bold p-3 bg-light rounded">{{ $question->question }}</div>
             </div>
 
-            <form id="answerForm">
+            <form id="answerForm" class="needs-validation" novalidate>
                 @csrf
                 <div class="mb-4">
                     <label class="form-label">選択肢 <span class="text-danger">*</span></label>
@@ -28,6 +28,9 @@
                                 </div>
                             </div>
                         @endforeach
+                    </div>
+                    <div id="select-error" class="text-danger small mt-2 d-none">
+                        <i class="bi bi-exclamation-triangle me-1"></i>選択肢を選んでください。
                     </div>
                 </div>
 
@@ -71,8 +74,20 @@
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-primary" onclick="loadProblemSelection()">一覧に戻る</button>
+                <div class="modal-footer border-0 d-flex justify-content-center gap-3">
+                @if(isset($next_question_id))
+                    <button type="button" class="btn btn-secondary px-4 py-2" onclick="loadProblemSelection()">
+                        一覧に戻る
+                    </button>
+
+                    <button type="button" class="btn btn-primary px-4 py-2" id="nextQuestionBtn" onclick="loadAnswerPage({{ $next_question_id }})">
+                        次の問題へ
+                    </button>
+                @else
+                    <button type="button" class="btn btn-primary px-5 py-2" onclick="loadProblemSelection()">
+                        一覧に戻る
+                    </button>
+                @endif
                 </div>
             </div>
         </div>

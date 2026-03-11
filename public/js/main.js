@@ -1313,6 +1313,15 @@ function renderQuestionsList(questions, container) {
 
 // 問題解答画面への遷移
 window.loadAnswerPage = function(questionId) {
+  // 強制的に黒い幕を消す（SPAでの安全策）
+  const backdrop = document.querySelector('.modal-backdrop');
+  if (backdrop) {
+      backdrop.remove();
+  }
+  // bodyのスクロールロックを解除
+  document.body.classList.remove('modal-open');
+  document.body.style.overflow = '';
+  document.body.style.paddingRight = '';
   const mainContent = document.getElementById('mainContent');
 
   mainContent.innerHTML = `
@@ -1344,7 +1353,7 @@ window.loadAnswerPage = function(questionId) {
 // 解答結果モーダルの表示
 document.addEventListener('click', function(e) {
 
-  // 1. クリックされた要素が「回答する」ボタン（またはその中のアイコン）か判定
+  // 1. クリックされた要素が「解答する」ボタン（またはその中のアイコン）か判定
   const submitBtn = e.target.closest('#submitBtn');
 
   // ボタン以外がクリックされたら何もしない
@@ -1359,12 +1368,14 @@ document.addEventListener('click', function(e) {
 
   // 4. 選択されたラジオボタンを取得
   const selectedRadio = answerForm.querySelector('input[name="choice_id"]:checked');
+  const errorMsg = document.getElementById('select-error');
 
   if (!selectedRadio) {
-      alert("選択肢を選んでください！");
+      if (errorMsg) errorMsg.classList.remove('d-none'); // メッセージを表示
       return;
+  } else {
+      if (errorMsg) errorMsg.classList.add('d-none'); // 選ばれたら隠す
   }
-
   // 5. テキストの取得
   const userText = selectedRadio.closest('.p-2').querySelector('.choice-text').innerText;
   const correctRadio = answerForm.querySelector('input[data-is-correct="1"]');

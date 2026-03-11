@@ -105,8 +105,20 @@ class QuestionsController extends Controller
 
     public function answer(QuizQuestion $question)
     {
+        $userId = auth()->id();
         $question->load(['choices', 'genre']);
 
-        return view('questions.answer', compact('question'));
+        // 同じジャンル内で、自分がまだ回答していない「次の1問」を取得
+        $nextQuestion = QuizQuestion::where('genre_id', $question->genre_id)
+        ->where('id', '!=', $question->id) // 今表示している問題は除く
+        ->whereDoesntHave('choices.answers', function ($query) use ($userId) {
+            $query->where('user_id', $userId);
+        })
+        ->first(); // 1件あればIDが取れる、なければnull
+
+        return view('questions.answer', [
+          'question' => $question,
+          'next_question_id' => $nextQuestion ? $nextQuestion->id : null,
+        ]);
     }
 }
