@@ -79,8 +79,12 @@ Route::middleware('auth')->group(function () {
 
     // 問題作成
     Route::get('/questions/create', function () {
-        return view('questions.create');
-    })->name('questions.create');
+      $genres = \App\Models\Genre::ordered()->get();
+      return view('questions.create', compact('genres'));
+  })->name('questions.create');
+
+  // 問題の保存実行
+  Route::post('/questions', [QuestionsController::class, 'store'])->name('questions.store');
 
     // 問題選択画面表示
     Route::get('/questions/select', [QuestionsController::class, 'select'])->name('questions.select');

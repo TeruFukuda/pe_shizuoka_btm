@@ -317,6 +317,18 @@ function loadProblemCreation() {
           const doc = parser.parseFromString(html, 'text/html');
           const creationContent = doc.querySelector('.problem-creation-container');
 
+          // ブラウザのタブ名（<title>）を更新
+          const newTitle = doc.querySelector('title').innerText;
+          document.title = newTitle;
+
+          // 画面上の大見出し（@yield('title') の部分）を更新
+          // レイアウト側の <h1> の中身を書き換える
+          const headerTitle = doc.querySelector('.dashboard-header h1');
+          if (headerTitle) {
+              // 現在の画面の h1 を、取得したHTMLの h1 の内容で書き換え
+              document.querySelector('.dashboard-header h1').innerText = headerTitle.innerText;
+          }
+
           if (creationContent) {
               mainContent.innerHTML = creationContent.outerHTML;
           } else {
@@ -327,6 +339,8 @@ function loadProblemCreation() {
                   </div>
               `;
           }
+
+          initCreateQuestionForm();
       })
       .catch(error => {
           console.error('Error:', error);
@@ -341,7 +355,6 @@ function loadProblemCreation() {
 
 // 問題選択表示関数
 function loadProblemSelection() {
-  // 強制的に黒い幕を消す（SPAでの安全策）
   const backdrop = document.querySelector('.modal-backdrop');
   if (backdrop) {
       backdrop.remove();
@@ -377,7 +390,7 @@ function loadProblemSelection() {
           document.title = newTitle;
 
           // 画面上の大見出し（@yield('title') の部分）を更新
-          // レイアウト側の <h1> の中身を書き換えます
+          // レイアウト側の <h1> の中身を書き換える
           const headerTitle = doc.querySelector('.dashboard-header h1');
           if (headerTitle) {
               // 現在の画面の h1 を、取得したHTMLの h1 の内容で書き換え
@@ -1405,9 +1418,55 @@ document.addEventListener('click', function(e) {
       ? '<i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>'
       : '<i class="bi bi-x-circle-fill text-danger" style="font-size: 5rem;"></i>';
 
-  // 表示！
+  // 表示
   resultModal.show();
 });
+
+// 問題作成フォームの初期化
+function initCreateQuestionForm() {
+  const form = document.getElementById('createQuestionForm');
+
+  if (!form) return; // フォームがなければ何もしない
+
+  form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const originalBtnText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> 保存中...';
+
+      const formData = new FormData(form);
+
+      try {
+          const response = await fetch(form.action, {
+              method: 'POST',
+              headers: {
+                  'X-Requested-With': 'XMLHttpRequest',
+                  'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+              },
+              body: formData
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+              alert('保存に成功しました！');
+              // 保存後の画面遷移（例：一覧に戻る関数を呼ぶ）
+              if (typeof loadProblemList === 'function') loadProblemList();
+          } else {
+              alert('エラー: ' + (result.message || '保存に失敗しました'));
+          }
+      } catch (error) {
+          console.error('通信エラー:', error);
+          alert('通信に失敗しました。');
+      } finally {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnText;
+      }
+  });
+}
+
 
 // ページ読み込み時にレーダーチャートとページング機能を初期化
 document.addEventListener('DOMContentLoaded', function() {

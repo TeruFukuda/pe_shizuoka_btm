@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Genre;
 use App\Models\QuizQuestion;
 use Illuminate\Http\Request;
+use DB;
 
 class QuestionsController extends Controller
 {
@@ -120,5 +121,66 @@ class QuestionsController extends Controller
           'question' => $question,
           'next_question_id' => $nextQuestion ? $nextQuestion->id : null,
         ]);
+    }
+
+    /**
+     * 作成画面の表示
+     */
+    public function create()
+    {
+        // 使用禁止（is_disabled）でないジャンルを取得
+        $genres = Genre::all();
+
+        return view('questions.create', compact('genres'));
+    }
+
+    /**
+     * データの保存処理
+     */
+    public function store(Request $request)
+    {
+
+      \Log::info('リクエストデータ:', $request->all());
+        // 1. バリデーション
+        $validated = $request->validate([
+            'genre_id' => 'required|exists:genres,id',
+            'question' => 'required|string|max:1000',
+            'choices' => 'required|array|min:2|max:6',
+            'choices.*.text' => 'required|string|max:255',
+            'correct_choice' => 'required|integer',
+        ]);
+
+        try {
+            // 2. データベース保存（トランザクション開始）
+            DB::transaction(function () use ($request) {
+
+                // 問題テーブルに保存
+                $question = QuizQuestion::create([
+                    'user_id'  => auth()->id(),
+                    'genre_id' => $request->genre_id,
+                    'question' => $request->question,
+                ]);
+
+                // 選択肢をループして保存
+                foreach ($request->choices as $index => $choiceData) {
+                    $question->choices()->create([
+                        'choice_text' => $choiceData['text'],
+                        // 送信されたラジオボタンのindexと現在のループindexが一致すれば正解
+                        'is_correct' => ($index == $request->correct_choice),
+                    ]);
+                }
+            });
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'クイズを作成しました！'
+            ]);
+
+        } catch (\Exception $e) {
+              return response()->json([
+                'status' => 'error',
+                'message' => '保存エラー: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
