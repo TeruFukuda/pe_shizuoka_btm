@@ -1313,12 +1313,11 @@ function renderQuestionsList(questions, container) {
 
 // 問題解答画面への遷移
 window.loadAnswerPage = function(questionId) {
-  // 強制的に黒い幕を消す（SPAでの安全策）
+  // 強制的に黒背景を消す
   const backdrop = document.querySelector('.modal-backdrop');
   if (backdrop) {
       backdrop.remove();
   }
-  // bodyのスクロールロックを解除
   document.body.classList.remove('modal-open');
   document.body.style.overflow = '';
   document.body.style.paddingRight = '';
@@ -1337,12 +1336,11 @@ window.loadAnswerPage = function(questionId) {
       .then(html => {
           const parser = new DOMParser();
           const doc = parser.parseFromString(html, 'text/html');
-          // 解答画面のコンテナ（仮に .answer-container とする）を抽出
+          // 解答画面を抽出
           const answerContent = doc.querySelector('.answer-container');
 
           if (answerContent) {
               mainContent.innerHTML = answerContent.outerHTML;
-              // 解答画面専用の初期化関数があればここで呼ぶ
           }
       })
       .catch(error => {
@@ -1362,7 +1360,7 @@ document.addEventListener('click', function(e) {
   const selectedRadio = form.querySelector('input[name="choice_id"]:checked');
   const errorMsg = document.getElementById('select-error');
 
-  // 1. バリデーション
+  // バリデーション
   if (!selectedRadio) {
       if (errorMsg) errorMsg.classList.remove('d-none');
       return;
@@ -1372,7 +1370,7 @@ document.addEventListener('click', function(e) {
 
   const choiceId = selectedRadio.value;
 
-  // 2. ★裏側でDBに保存（Ajax）
+  // DBに保存（Ajax）
   fetch('/quiz-answers/store', {
       method: 'POST',
       headers: {
@@ -1385,15 +1383,15 @@ document.addEventListener('click', function(e) {
   .then(data => console.log('DB保存成功:', data))
   .catch(error => console.error('DB保存失敗:', error));
 
-  // 5. テキストの取得
+  // テキストの取得
   const userText = selectedRadio.closest('.p-2').querySelector('.choice-text').innerText;
   const correctRadio = answerForm.querySelector('input[data-is-correct="1"]');
   const correctText = correctRadio.closest('.p-2').querySelector('.choice-text').innerText;
 
-  // 6. 正誤判定
+  // 正誤判定
   const isCorrect = selectedRadio.getAttribute('data-is-correct') === "1";
 
-  // 7. モーダルへの反映
+  // モーダルへの反映
   const modalElem = document.getElementById('resultModal');
   const resultModal = bootstrap.Modal.getOrCreateInstance(modalElem);
 
@@ -1407,7 +1405,7 @@ document.addEventListener('click', function(e) {
       ? '<i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>'
       : '<i class="bi bi-x-circle-fill text-danger" style="font-size: 5rem;"></i>';
 
-  // 8. 表示！
+  // 表示！
   resultModal.show();
 });
 
