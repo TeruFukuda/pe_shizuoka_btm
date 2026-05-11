@@ -25,15 +25,12 @@
                                     <td class="ps-3 fw-bold text-dark">
                                         {{ $genre->name }}
                                     </td>
-                                    {{-- 右寄せ (text-end) 部分の修正 --}}
                                     <td class="text-end pe-3">
                                         @if($genre->unanswered_count > 0)
-                                            {{-- 背景をネイビー (#0d47a1など) に。文字は白 (text-white) --}}
                                             <span class="badge rounded-pill shadow-sm" style="background-color: #0d47a1; color: white;">
                                                 {{ $genre->unanswered_count }}
                                             </span>
                                         @else
-                                            {{-- 完了時は変わらず緑で達成感を！ --}}
                                             <span class="badge bg-success rounded-pill shadow-sm">
                                                 <i class="bi bi-check-lg"></i>
                                             </span>
