@@ -1469,6 +1469,95 @@ function initCreateQuestionForm() {
   cancelButton.addEventListener('click', function() {
         loadProblemList();
   });
+
+  const container = document.getElementById('choicesContainer');
+    const addButton = document.getElementById('addChoice');
+
+    // インデックスとIDを動的に振り直す関数
+    function reindexChoices() {
+        const items = container.querySelectorAll('.choice-item');
+        let hasChecked = false; // 正解が選択されているかフラグ
+
+        items.forEach((item, index) => {
+            // テキスト入力のname更新
+            item.querySelector('.choice-text').name = `choices[${index}][text]`;
+            // ラジオボタンのID、Value、Labelの紐付けを更新
+            const radio = item.querySelector('.form-check-input');
+            const label = item.querySelector('.form-check-label');
+            radio.value = index;
+            radio.id = `correct_${index}`;
+            label.setAttribute('for', `correct_${index}`);
+
+            // 2個以下のときは削除ボタンを非表示にする
+            const deleteBtn = item.querySelector('.remove-choice');
+            if (items.length <= 2) {
+                deleteBtn.classList.add('invisible');
+            } else {
+                deleteBtn.classList.remove('invisible');
+            }
+
+            // 正解の選択肢としてチェックされているか確認
+              if (radio.checked) {
+                hasChecked = true;
+            }
+        });
+
+        // 選択肢を削除した結果、正解として選択しているものがなくなったとき、一番上のものを選択する
+          if (!hasChecked && items.length > 0) {
+            const firstRadio = items[0].querySelector('.form-check-input');
+            if (firstRadio) {
+                firstRadio.checked = true;
+            }
+        }
+    }
+
+    // 選択肢追加
+    addButton.addEventListener('click', (e) => {
+        e.preventDefault(); // フォーム送信を防ぐ
+        const currentCount = container.querySelectorAll('.choice-item').length;
+        if (currentCount >= 6) {
+            alert('選択肢は最大6個までです。');
+            return;
+        }
+
+        const newRow = document.createElement('div');
+        newRow.className = 'choice-item mb-3 p-3 border rounded bg-white shadow-sm';
+        newRow.innerHTML = `
+            <div class="row align-items-center gap-2 gap-md-0">
+                <div class="col-md-8">
+                    <input type="text" class="form-control choice-text" placeholder="選択肢を入力" required>
+                </div>
+                <div class="col-md-3 col-8">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="correct_choice">
+                        <label class="form-check-label">正解</label>
+                    </div>
+                </div>
+                <div class="col-md-1 col-4 text-end">
+                    <button type="button" class="btn btn-outline-danger btn-sm remove-choice">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </div>`;
+        container.appendChild(newRow);
+        reindexChoices();
+    });
+
+    // 削除（イベントデリゲーション）
+    container.addEventListener('click', (e) => {
+        if (e.target.closest('.remove-choice')) {
+            const items = container.querySelectorAll('.choice-item');
+            if (items.length > 2) {
+                e.target.closest('.choice-item').remove();
+                reindexChoices();
+            } else {
+                alert('選択肢は最低2個必要です。');
+            }
+        }
+    });
+
+    // 初回実行（削除ボタンの状態制御のため）
+    reindexChoices();
 }
 
 
