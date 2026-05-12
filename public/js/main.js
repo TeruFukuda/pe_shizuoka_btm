@@ -1509,6 +1509,13 @@ function initCreateQuestionForm() {
                 firstRadio.checked = true;
             }
         }
+
+        // 選択肢を追加ボタンの表示制御（6個になったら非表示）
+        if (items.length >= 6) {
+            addButton.classList.add('d-none');
+        } else {
+            addButton.classList.remove('d-none');
+        }
     }
 
     // 選択肢追加
