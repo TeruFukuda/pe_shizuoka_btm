@@ -87,9 +87,11 @@
                 <hr class="my-4">
 
                 <div class="d-flex justify-content-end gap-2">
-                    <a href="{{ route('questions.index') }}" class="btn btn-light border">
-                        キャンセル
-                    </a>
+                <button type="button"
+                        id="cancel-button__create"
+                        class="btn btn-light border">
+                    キャンセル
+                </button>
                     <button type="submit" class="btn btn-primary px-4">
                         <i class="bi bi-check-circle me-1"></i>問題を登録する
                     </button>

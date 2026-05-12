@@ -1383,7 +1383,7 @@ document.addEventListener('click', function(e) {
 
   const choiceId = selectedRadio.value;
 
-  // DBに保存（Ajax）
+  // DBに保存
   fetch('/quiz-answers/store', {
       method: 'POST',
       headers: {
@@ -1452,7 +1452,6 @@ function initCreateQuestionForm() {
 
           if (response.ok) {
               alert('保存に成功しました！');
-              // 保存後の画面遷移（例：一覧に戻る関数を呼ぶ）
               if (typeof loadProblemList === 'function') loadProblemList();
           } else {
               alert('エラー: ' + (result.message || '保存に失敗しました'));
@@ -1464,6 +1463,11 @@ function initCreateQuestionForm() {
           submitBtn.disabled = false;
           submitBtn.innerHTML = originalBtnText;
       }
+  });
+
+  const cancelButton = document.getElementById('cancel-button__create');
+  cancelButton.addEventListener('click', function() {
+        loadProblemList();
   });
 }
 
